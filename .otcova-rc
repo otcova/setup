@@ -33,7 +33,7 @@ function i-java() {
 
 function i-tmux() {
   sudo apt-get -y install tmux >/dev/null
-  wget -qO- 'https://raw.githubusercontent.com/otcova/setup/refs/heads/main/.tmux-config' >~/.tmux.config
+  wget -qO- 'https://raw.githubusercontent.com/otcova/setup/refs/heads/main/.tmux.conf' >~/.tmux.conf
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 }
 
@@ -69,6 +69,8 @@ which nvim && alias v='nvim'
 
 alias bat='batcat'
 alias e='exit'
+
+alias t='tmux new -As main'
 
 #### Grep Aliases ####
 alias hg='cat ~/.bash_history | rg'
