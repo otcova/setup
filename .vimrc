@@ -37,4 +37,5 @@ nnoremap gr /<c-r><c-w><cr>
 " Color scheme (terminal)
 set t_Co=256
 set background=dark
+colorscheme gruvbox
 " wget -qO- 'https://raw.githubusercontent.com/morhetz/gruvbox/refs/heads/master/colors/gruvbox.vim' > ~/.vim/colors
