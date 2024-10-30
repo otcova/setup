@@ -11,7 +11,16 @@ function i-nvim() {
   git clone https://github.com/LazyVim/starter ~/.config/nvim
   sudo apt install ripgrep fd-find >/dev/null
 
+  wget -qO- 'https://raw.githubusercontent.com/otcova/setup/refs/heads/main/nvim-otcova.lua' >~/.config/nvim/plugins
+
   echo 'TODO: Install Nerd font'
+}
+
+function i-vim() {
+  wget -qO- 'https://raw.githubusercontent.com/otcova/setup/refs/heads/main/.vimrc' >~/.vimrc
+  mkdir -p ~/.vim
+  wget -qO- 'https://raw.githubusercontent.com/morhetz/gruvbox/refs/heads/master/colors/gruvbox.vim' >~/.vim/colors
+  sudo apt-get -y install vim >/dev/null
 }
 
 function i-js() {
@@ -80,6 +89,6 @@ alias rf='rg --files | rg'
 alias rc='v ~/.bashrc'
 
 #### Module Prompt ####
-PROMPT_COMMAND='PS1_CMD1=$(__git_ps1 " (%s)")'
-PS1='\n\w${PS1_CMD1}\n> '
-[[ $(tput colors) ]] && PS1='\n\[\033[01;32m\]\w\[\033[01;34m\]${PS1_CMD1}\n\[\033[01;00m\]> '
+[[ $(which git) ]] && PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
+PS1='\n\w${PS1_GIT}\n> '
+[[ $(tput colors) ]] && PS1='\n\[\033[01;32m\]\w\[\033[01;34m\]${PS1_GIT}\n\[\033[01;00m\]> '
