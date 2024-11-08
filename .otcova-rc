@@ -1,13 +1,19 @@
 #!/bin/bash
 
 function i-rc() {
+  echo 'Configuring bashrc'
   wget -qO- 'https://raw.githubusercontent.com/otcova/setup/refs/heads/main/.otcova-rc' >~/.otcova-rc
+  . ~/.otcova-rc
 }
 
 function i-nvim() {
+  [[ $(which nvim) ]] && printf 'Installing ' || printf 'Updateing '
+  echo 'nvim'
+
   sudo apt-get -y install neovim >/dev/null
   alias v='nvim'
 
+  echo 'Configuring nvim'
   git clone https://github.com/LazyVim/starter ~/.config/nvim
   sudo apt install ripgrep fd-find >/dev/null
 
@@ -17,6 +23,7 @@ function i-nvim() {
 }
 
 function i-vim() {
+  echo 'Configuring vim'
   wget -qO- 'https://raw.githubusercontent.com/otcova/setup/refs/heads/main/.vimrc' >~/.vimrc
   mkdir -p ~/.vim/colors
   wget -qO- 'https://raw.githubusercontent.com/morhetz/gruvbox/refs/heads/master/colors/gruvbox.vim' >~/.vim/colors/gruvbox.vim
@@ -24,14 +31,20 @@ function i-vim() {
 }
 
 function i-js() {
+  [[ $(which node) ]] && printf 'Installing ' || printf 'Updateing '
+  echo 'node'
   sudo apt-get install nodejs npm >/dev/null
 }
 
 function i-rust() {
+  [[ $(which cargo) ]] && printf 'Installing ' || printf 'Updateing '
+  echo 'cargo'
   wget -qO- 'https://sh.rustup.rs' | sh
 }
 
 function i-java() {
+  [[ $(which sdkman) ]] && printf 'Installing ' || printf 'Updateing '
+  echo 'sdkman'
   sudo apt install zip unzip >/dev/null
   curl -s 'https://get.sdkman.io' | bash
 
@@ -41,21 +54,25 @@ function i-java() {
 }
 
 function i-tmux() {
+  [[ $(which tmux) ]] && printf 'Installing ' || printf 'Updateing '
+  echo 'tmux'
   sudo apt-get -y install tmux >/dev/null
+
+  echo 'Configuring tmux'
   wget -qO- 'https://raw.githubusercontent.com/otcova/setup/refs/heads/main/.tmux.conf' >~/.tmux.conf
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 }
 
-function i-utils() {
-  echo 'Upgrading'
-  sudo apt-get -y update >/dev/null
-  sudo apt-get -y upgrade >/dev/null
-
-  echo 'Installing rg'
+function i-rg() {
+  [[ $(which batcat) ]] && printf 'Installing ' || printf 'Updateing '
+  echo 'rg'
   sudo apt-get -y install ripgrep >/dev/null
+}
 
-  echo 'Installing bat'
-  sudo apt-get -y install batcat >/dev/null
+function i-bat() {
+  [[ $(which batcat) ]] && printf 'Installing ' || printf 'Updateing '
+  echo 'bat'
+  sudo apt-get -y install bat >/dev/null
 }
 
 #### cd Aliases ####
@@ -89,6 +106,6 @@ alias rf='rg --files | rg'
 alias rc='v ~/.bashrc'
 
 #### Module Prompt ####
-[[ $(which git) ]] && PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
+[[ $(command -x __git_ps1) ]] && PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
 PS1='\n\w${PS1_GIT}\n> '
 [[ $(tput colors) ]] && PS1='\n\[\033[01;32m\]\w\[\033[01;34m\]${PS1_GIT}\n\[\033[01;00m\]> '

@@ -56,47 +56,50 @@ return {
       window = {
         auto_expand_width = true,
         mappings = {
-          ["<cr>"] = function() end,
-          ["s"] = "toggle_hidden",
+          ["s"] = "toggle_hidden", -- show hidden
+          ["?"] = "show_help",
           ["/"] = "fuzzy_finder",
           ["H"] = "close_all_nodes",
           ["L"] = "expand_all_nodes",
           ["h"] = "close_node",
-          ["l"] = function(state)
-            local cc = require("neo-tree.sources.common.commands")
-            local fs = require("neo-tree.sources.filesystem")
-            local renderer = require("neo-tree.ui.renderer")
+          ["l"] = {
+            function(state)
+              local cc = require("neo-tree.sources.common.commands")
+              local fs = require("neo-tree.sources.filesystem")
+              local renderer = require("neo-tree.ui.renderer")
 
-            local function expand_folders(node)
-              if node == nil or node.type ~= "directory" then
-                return
-              end
-
-              if node.loaded then
-                if node:has_children() then
-                  renderer.focus_node(state, node:get_child_ids()[1])
+              local function expand_folders(node)
+                if node == nil or node.type ~= "directory" then
+                  return
                 end
-                return
-              end
 
-              local parent = state.tree:get_node(node:get_parent_id())
-              local childs = parent:get_child_ids()
-              local grouped_child = nil
-
-              for i = 1, #childs do
-                if childs[i]:sub(1, #node.id) == node.id then
-                  grouped_child = state.tree:get_node(childs[i])
-                  break
+                if node.loaded then
+                  if node:has_children() then
+                    renderer.focus_node(state, node:get_child_ids()[1])
+                  end
+                  return
                 end
+
+                local parent = state.tree:get_node(node:get_parent_id())
+                local childs = parent:get_child_ids()
+                local grouped_child = nil
+
+                for i = 1, #childs do
+                  if childs[i]:sub(1, #node.id) == node.id then
+                    grouped_child = state.tree:get_node(childs[i])
+                    break
+                  end
+                end
+
+                fs.toggle_directory(state, grouped_child, nil, nil, nil, function()
+                  expand_folders(grouped_child)
+                end)
               end
 
-              fs.toggle_directory(state, grouped_child, nil, nil, nil, function()
-                expand_folders(grouped_child)
-              end)
-            end
-
-            cc.open(state, expand_folders)
-          end,
+              cc.open(state, expand_folders)
+            end,
+            desc = "Open",
+          },
         },
       },
     },
