@@ -106,6 +106,6 @@ alias rf='rg --files | rg'
 alias rc='v ~/.bashrc'
 
 #### Module Prompt ####
-[[ $(command -x __git_ps1) ]] && PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
+[[ $(command -v __git_ps1) ]] && PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
 PS1='\n\w${PS1_GIT}\n> '
 [[ $(tput colors) ]] && PS1='\n\[\033[01;32m\]\w\[\033[01;34m\]${PS1_GIT}\n\[\033[01;00m\]> '
