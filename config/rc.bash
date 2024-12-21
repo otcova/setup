@@ -38,7 +38,7 @@ cmd-info 'config-all'
 cmd-info 'config-tmux'
 cmd-info 'config-nvim'
 cmd-info 'config-git'
-cmd-info 'config-alacritty'
+cmd-info 'config-kitty'
 
 header 'Grep Aliases'
 cmd 'hs <regex>  ' '# History search' 'cat ~/.bash_history | rg'
@@ -91,7 +91,7 @@ function ask-rm() {
   fi
 
   if [[ -e "$1" || -L "$1" ]]; then
-    read -rn 1 -p 'Override file '$green"$1"$reset'? '
+    read -rn 1 -p 'Override file '$blue"$1"$reset'? '
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       echo 'es'
       rm -rf "$1"
@@ -167,6 +167,8 @@ function config-all() {
   config-tmux
   echo "${blue}Nvim${reset}"
   config-nvim
+  echo "${blue}Kitty${reset}"
+  config-kitty
 }
 
 function config-tmux() {
@@ -177,6 +179,22 @@ function config-tmux() {
 function config-nvim() {
   git-install https://github.com/LazyVim/starter ~/.config/nvim
   link ~/.otcova-setup/config/nvim.lua ~/.config/nvim/lua/plugins/otcova.lua
+}
+
+function config-kitty() {
+  wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+
+  link ~/.local/kitty.app/bin/kitty ~/.bin/kitty
+  link ~/.local/kitty.app/bin/kitten ~/.bin/kitten
+
+  link ~/.otcova-setup/config/kitty.conf ~/.config/kitty/kitty.conf
+}
+
+function config-git() {
+  echo "TODO: gen keys"
+  echo "TODO: set default editor"
+  echo "TODO: set user"
+  echo "TODO: install delta"
 }
 
 function _otcova-add-rc-hook() {
@@ -222,7 +240,7 @@ function otcova-update() {
 ######### Path #######
 ######################
 
-PATH="$HOME/.otcova-setup/bin:$PATH:."
+PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH:."
 
 ######################
 ####### Prompt #######
@@ -246,3 +264,16 @@ _lazy_autocomplete() {
 for command in fd rg bat; do
   complete -F _lazy_autocomplete -o bashdefault -o default $command
 done
+
+#########################
+####### WSL Fixes #######
+#########################
+
+if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+  ln -s /mnt/wslg/runtime-dir/wayland-0* /run/user/* 2>/dev/null
+fi
+
+if [ -z "$TMUX" ]; then
+  t
+  exit
+fi
