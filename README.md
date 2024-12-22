@@ -44,7 +44,7 @@ h      # ~
 d      # ~/Desktop/
 
 Tmux
-t      # Main tmux session
+tmux-main # Main tmux session
 
 Binaries
 nvim   # Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)

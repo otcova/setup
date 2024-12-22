@@ -1,10 +1,19 @@
 #!/bin/bash
 
+#######################################
+####### Continue if Interactive #######
+#######################################
+
+case $- in
+*i*) ;;
+*) return ;;
+esac
+
 ######################
 ####### Colors #######
 ######################
 
-if [[ $(tput colors) -ge 8 ]]; then
+if [ "$(tput colors)" -ge 8 ]; then
   reset=$'\e[0m'
   black=$'\e[1;30m'
   red=$'\e[1;31m'
@@ -65,7 +74,7 @@ cmd 'h      ' '# ~' 'cd ~'
 cmd 'd      ' '# ~/Desktop/' 'cd ~/Desktop/'
 
 header 'Tmux'
-cmd 't      ' '# Main tmux session' 'tmux new -As main'
+cmd 'tmux-main ' '# Main tmux session' 'tmux new -As main'
 
 header 'Binaries'
 cmd-info 'nvim   ' '# Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)'
@@ -73,7 +82,7 @@ cmd-info 'rg     ' '# Source: https://github.com/BurntSushi/ripgrep/releases/tag
 cmd-info 'fd     ' '# Source: https://github.com/sharkdp/fd/releases/tag/v10.2.0 (fd-v10.2.0-x86_64-unknown-linux-gnu.tar.gz)'
 cmd-info 'bat    ' '# Source: https://github.com/sharkdp/bat/releases/tag/v0.24.0 (bat-v0.24.0-x86_64-unknown-linux-gnu.tar.gz)'
 
-alias otcova="echo '${help}' | less -r"
+alias otcova=". ${HOME}/.otcova-setup/config/rc.bash && echo '${help}' | less -r"
 unset header cmd-info cmd help
 
 #########################
@@ -81,7 +90,7 @@ unset header cmd-info cmd help
 #########################
 
 function ask-rm() {
-  if [[ "$1" == "--help" || "$1" == "-h" || $# != 1 ]]; then
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 1 ]; then
     echo "Usage:"
     echo "  ask-rm <path>"
     echo ""
@@ -90,9 +99,9 @@ function ask-rm() {
     return
   fi
 
-  if [[ -e "$1" || -L "$1" ]]; then
+  if [ -e "$1" ] || [ -L "$1" ]; then
     read -rn 1 -p 'Override file '$blue"$1"$reset'? '
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
       echo 'es'
       rm -rf "$1"
     else
@@ -103,7 +112,7 @@ function ask-rm() {
 }
 
 function link() {
-  if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage:"
     echo "  link [<src>] [<dst>]"
     echo ""
@@ -140,7 +149,7 @@ function v() {
 }
 
 function git-install() {
-  if [[ "$1" == "--help" || "$1" == "-h" || $# != 2 ]]; then
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 2 ]; then
     echo "Usage:"
     echo "  git-install <repo-url> <dst>"
     echo ""
@@ -150,7 +159,7 @@ function git-install() {
     return
   fi
 
-  if [[ $(git -C "$2" remote get-url origin 2>/dev/null) == "$1" ]]; then
+  if [ "$(git -C "$2" remote get-url origin 2>/dev/null)" = "$1" ]; then
     git pull
   else
     ask-rm "$2"
@@ -200,12 +209,11 @@ function config-git() {
 function _otcova-add-rc-hook() {
   config_line=". '${HOME}/.otcova-setup/config/rc.bash'"
 
-  rc_file="${HOME}/.bashrc"
-  if [[ "$0" == *zsh* ]]; then
-    rc_file="${HOME}/.zshrc"
-  elif [[ "$0" == *tcsh* ]]; then
-    rc_file="${HOME}/.tcshrc"
-  fi
+  case "$0" in
+  *zsh*) rc_file="${HOME}/.zshrc" ;;
+  *tcsh*) rc_file="${HOME}/.tcshrc" ;;
+  *) rc_file="${HOME}/.bashrc" ;;
+  esac
 
   if [ -e "$rc_file" ]; then
     if ! grep -q "$config_line" "$rc_file"; then
@@ -237,16 +245,12 @@ function otcova-update() {
 }
 
 ######################
-######### Path #######
-######################
-
-PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH:."
-
-######################
 ####### Prompt #######
 ######################
 
-[[ $(command -v __git_ps1) ]] && PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
+if [ -n "$(command -v __git_ps1)" ]; then
+  PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
+fi
 PS1='\n'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
 
 bind '"\e[A": history-search-backward'
@@ -256,7 +260,7 @@ bind '"\e[B": history-search-forward'
 ####### Load Autocomplete #######
 #################################
 
-_lazy_autocomplete() {
+function _lazy_autocomplete() {
   . ~/.otcova-setup/autocomplete/"$1".bash
   "_$1" "$@"
 }
@@ -265,15 +269,26 @@ for command in fd rg bat; do
   complete -F _lazy_autocomplete -o bashdefault -o default $command
 done
 
+######################
+######### Path #######
+######################
+
+PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH"
+
 #########################
 ####### WSL Fixes #######
 #########################
 
 if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
-  ln -s /mnt/wslg/runtime-dir/wayland-0* /run/user/* 2>/dev/null
+  ln -s /mnt/wslg/runtime-dir/wayland-0 /run/user/* 2>/dev/null
+  ln -s /mnt/wslg/runtime-dir/wayland-0.lock /run/user/* 2>/dev/null
 fi
 
+######################################
+####### Open tmux main session #######
+######################################
+
 if [ -z "$TMUX" ]; then
-  t
+  tmux-main
   exit
 fi
