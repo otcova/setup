@@ -74,7 +74,7 @@ cmd 'h          ' '# ~' 'cd ~'
 cmd 'd          ' '# ~/Desktop/' 'cd ~/Desktop/'
 
 header 'Tmux'
-cmd 'tmux-main  ' '# Main tmux session' 'tmux new -As main'
+cmd 'tmux-main  ' '# Main tmux session' 'tmux a -t main 2>/dev/null || tmux new -s main \; new-window \; select-window -t 0 >/dev/null'
 
 header 'Binaries'
 cmd-info 'nvim       ' '# Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)'
@@ -251,6 +251,7 @@ PS1='\n'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
 
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
+bind '"\C-s": clear-screen'
 
 #################################
 ####### Load Autocomplete #######
@@ -271,10 +272,14 @@ done
 
 PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH"
 
-#########################
-####### WSL Fixes #######
-#########################
+#####################
+####### Fixes #######
+#####################
 
+# Fix Ctrl-S Freeze
+stty -ixon
+
+# Fix WSL Wayland
 if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   ln -s /mnt/wslg/runtime-dir/wayland-0 /run/user/* 2>/dev/null
   ln -s /mnt/wslg/runtime-dir/wayland-0.lock /run/user/* 2>/dev/null
