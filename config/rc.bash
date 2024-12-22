@@ -50,37 +50,38 @@ cmd-info 'config-git'
 cmd-info 'config-kitty'
 
 header 'Grep Aliases'
-cmd 'hs <regex>  ' '# History search' 'cat ~/.bash_history | rg'
-cmd 'fs <regex>  ' '# File search' 'rg --files | rg'
+cmd 'hs <regex> ' '# History search' 'cat ~/.bash_history | rg'
+cmd 'fs <regex> ' '# File search' 'rg --files | rg'
 
 header 'Git Aliases'
-cmd 'ga     ' '# add, commit' 'git add . && git commit --message'
-cmd 'gp     ' '# pull, push' 'git pull && git push'
-cmd 'gs     ' '# status' 'git status'
-cmd 'gb     ' '# branch' 'git branch'
-cmd 'glog   ' '# log' 'git log --pretty="format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s" --date="relative"'
-cmd 'gpull  ' '# pull' 'git pull'
-cmd 'gpush  ' '# push' 'git push'
+cmd 'ga         ' '# add, commit' 'git add . && git commit --message'
+cmd 'gp         ' '# pull, push' 'git pull && git push'
+cmd 'gs         ' '# status' 'git status'
+cmd 'gb         ' '# branch' 'git branch'
+cmd 'glog       ' '# log' 'git log --pretty="format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s" --date="relative"'
+cmd 'gpull      ' '# pull' 'git pull'
+cmd 'gpush      ' '# push' 'git push'
 
 header 'Vim'
-cmd-info 'v      ' '# cd, nvim'
+cmd-info 'v          ' '# cd, nvim'
 
 header 'Fast Edit'
-cmd 'setup  ' '# v ~/.otcova-setup' "nvim $HOME/.otcova-setup"
-cmd 'rc     ' '# v ~/.otcova-setup/rc.bash' "nvim $HOME/.otcova-setup/rc.bash"
+cmd 'setup      ' '# v ~/.otcova-setup' "nvim $HOME/.otcova-setup"
+cmd 'rc         ' '# v ~/.otcova-setup/rc.bash' "nvim $HOME/.otcova-setup/rc.bash"
 
 header 'Directories'
-cmd 'h      ' '# ~' 'cd ~'
-cmd 'd      ' '# ~/Desktop/' 'cd ~/Desktop/'
+cmd 'h          ' '# ~' 'cd ~'
+cmd 'd          ' '# ~/Desktop/' 'cd ~/Desktop/'
 
 header 'Tmux'
-cmd 'tmux-main ' '# Main tmux session' 'tmux new -As main'
+cmd 'tmux-main  ' '# Main tmux session' 'tmux new -As main'
 
 header 'Binaries'
-cmd-info 'nvim   ' '# Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)'
-cmd-info 'rg     ' '# Source: https://github.com/BurntSushi/ripgrep/releases/tag/14.1.1 (ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz)'
-cmd-info 'fd     ' '# Source: https://github.com/sharkdp/fd/releases/tag/v10.2.0 (fd-v10.2.0-x86_64-unknown-linux-gnu.tar.gz)'
-cmd-info 'bat    ' '# Source: https://github.com/sharkdp/bat/releases/tag/v0.24.0 (bat-v0.24.0-x86_64-unknown-linux-gnu.tar.gz)'
+cmd-info 'nvim       ' '# Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)'
+cmd-info 'rg         ' '# Source: https://github.com/BurntSushi/ripgrep/releases/tag/14.1.1 (ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz)'
+cmd-info 'fd         ' '# Source: https://github.com/sharkdp/fd/releases/tag/v10.2.0 (fd-v10.2.0-x86_64-unknown-linux-gnu.tar.gz)'
+cmd-info 'bat        ' '# Source: https://github.com/sharkdp/bat/releases/tag/v0.24.0 (bat-v0.24.0-x86_64-unknown-linux-gnu.tar.gz)'
+cmd-info 'yazi       ' '# Source: https://github.com/sxyazi/yazi/releases/tag/v0.4.2 (yazi-x86_64-unknown-linux-gnu.zip)'
 
 alias otcova=". ${HOME}/.otcova-setup/config/rc.bash && echo '${help}' | less -r"
 unset header cmd-info cmd help
@@ -112,22 +113,17 @@ function ask-rm() {
 }
 
 function link() {
-  if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
     echo "Usage:"
     echo "  link [<src>] [<dst>]"
     echo ""
     echo "<src> default value is $PWD"
-    echo "<dst> default value is $HOME/Desktop/"
+    echo "<dst> default value is $HOME/Desktop/<src-basename>"
     return
   fi
 
   src="${1:-$PWD}"
-  dst="${2:-$HOME/Desktop}"
-
-  if [ -d "$dst" ]; then
-    dst+='/'
-    dst+=$(basename "$src")
-  fi
+  dst="${2:-$HOME/Desktop/$(basename -- "$src")}"
 
   if [ "$src" -ef "$dst" ]; then
     return # File exists and is correct, do nothing
@@ -196,7 +192,7 @@ function config-kitty() {
   link ~/.local/kitty.app/bin/kitty ~/.bin/kitty
   link ~/.local/kitty.app/bin/kitten ~/.bin/kitten
 
-  link ~/.otcova-setup/config/kitty.conf ~/.config/kitty/kitty.conf
+  link ~/.otcova-setup/config/kitty ~/.config/kitty
 }
 
 function config-git() {
@@ -265,7 +261,7 @@ function _lazy_autocomplete() {
   "_$1" "$@"
 }
 
-for command in fd rg bat; do
+for command in fd rg bat yazi; do
   complete -F _lazy_autocomplete -o bashdefault -o default $command
 done
 
