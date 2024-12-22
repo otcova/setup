@@ -93,6 +93,81 @@ unset header cmd-info cmd
 ####### Functions #######
 #########################
 
+function prompt-path() {
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
+    echo "Usage:"
+    echo "  prompt-path [<prompt>] [<default>]"
+    echo ""
+    echo 'The resulting value is stored in $REPLY'
+    echo ""
+    echo "Example:"
+    echo "  > prompt-str 'Enter a path' '~/.config'"
+    echo "  Enter a path (~/.config):"
+    return
+  fi
+
+  prompt=""
+  if [ ! -z "$1" ]; then
+    if [ -z "$2" ]; then
+      prompt="${1}: "
+    else
+      prompt="${1} (${2}): "
+    fi
+  fi
+
+  read -rep "$prompt"
+  REPLY="${REPLY:-"$2"}"
+  REPLY="${REPLY/#\~/$HOME}" # Expand ~ to home
+}
+
+function prompt-str() {
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
+    echo "Usage:"
+    echo "  prompt-str [<prompt>] [<default>]"
+    echo ""
+    echo 'The resulting value is stored in $REPLY'
+    echo ""
+    echo "Example:"
+    echo "  > prompt-str 'Enter name' 'Richard'"
+    echo "  Enter name (Richard):"
+    return
+  fi
+
+  prompt=""
+  if [ ! -z "$1" ]; then
+    if [ -z "$2" ]; then
+      prompt="${1}: "
+    else
+      prompt="${1} (${2}): "
+    fi
+  fi
+
+  read -rp "$prompt"
+  REPLY="${REPLY:-"$2"}"
+}
+
+function prompt-confirm() {
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 1 ]; then
+    echo "Usage:"
+    echo "  prompt-confirm <prompt>"
+    echo ""
+    echo 'The resulting value is stored in $REPLY'
+    echo ""
+    echo "Example:"
+    echo "  > prompt-confirm 'Are you sure'"
+    echo "  Are you sure (yes)?"
+    return
+  fi
+
+  read -rn 1 -p "${1} (yes)? "
+  if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
+    echo 'es'
+  elif [ ! -z "$REPLY" ]; then
+    echo ''
+    return 1
+  fi
+}
+
 function ask-rm() {
   if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 1 ]; then
     echo "Usage:"
@@ -104,12 +179,9 @@ function ask-rm() {
   fi
 
   if [ -e "$1" ] || [ -L "$1" ]; then
-    read -rn 1 -p 'Override file '$blue"$1"$reset'? '
-    if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
-      echo 'es'
+    if prompt-confirm "Override file ${blue}${1}${reset}"; then
       rm -rf "$1"
     else
-      echo ''
       return 1
     fi
   fi
@@ -133,7 +205,7 @@ function link() {
   fi
 
   if ask-rm "$dst"; then
-    mkdir -p "$(dirname "$dst")"
+    mkdir -p "$(dirname -- "$dst")"
     ln -s "$src" "$dst"
   fi
 }
@@ -199,10 +271,50 @@ function config-kitty() {
 }
 
 function config-git() {
-  echo "TODO: gen keys"
-  echo "TODO: set default editor"
-  echo "TODO: set user"
-  echo "TODO: install delta"
+  # Config delta (git diff)
+  git config --global core.pager delta
+  git config --global interactive.diffFilter 'delta --color-only'
+  git config --global merge.conflictStyle zdiff3
+  git config --global delta.navigate true
+  git config --global delta.side-by-side true
+
+  # Use nvim
+  git config --global core.editor nvim
+
+  # Set user
+  prompt-str "Git user.name" "$(git config --global user.name)"
+  git config --global user.name "$REPLY"
+  prompt-str "Git user.email" "$(git config --global user.email)"
+  git config --global user.email "$REPLY"
+
+  # Set up ssh keys
+  current_ssh="$(git config --global core.sshCommand)"
+  if [ ! -z "$current_ssh" ]; then
+    if ! prompt-confirm "Change configured ssh '${current_ssh}'"; then
+      return
+    fi
+  fi
+
+  key_path=''
+  if prompt-confirm 'Generate new ssh keys'; then
+    prompt-path 'Enter file in which to save the key' "$HOME/.ssh/id_ed25519"
+    key_path="$REPLY"
+    if ! ask-rm "$key_path"; then
+      return
+    fi
+    mkdir -p "$(dirname -- "$key_path")"
+    ssh-keygen -q -t ed25519 -C "$(git config --global user.email)" -f "$key_path"
+  else
+    prompt-path 'Enter key path' "$HOME/.ssh/id_rsa"
+    key_path="$REPLY"
+  fi
+
+  if [ -e "$key_path" ]; then
+    chmod 600 "$key_path"
+    git config core.sshCommand "ssh -i '${key_path}'"
+  else
+    echo "${red}[ERROR]${reset} Ssh key '$key_path' not found"
+  fi
 }
 
 function _otcova-add-rc-hook() {
