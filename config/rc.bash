@@ -93,7 +93,7 @@ cmd-info 'yazi       ' '# Source: https://github.com/sxyazi/yazi/releases/tag/v0
 header 'Otcova Setup'
 cmd 'otcova           ' '# Reload rc and show help' '. ${HOME}/.otcova-setup/config/rc.bash ; echo "${OTCOVA_HELP}" | less -r'
 cmd-info 'otcova-update    ' '# Update and reload'
-cmd-info 'otcova-install   ' '# Sets up the rc and starts config-all'
+cmd-info 'otcova-install   ' '# Sets up the rc and starts c-all'
 cmd-info 'otcova-uninstall ' '# Removes ~/.otcova-setup'
 
 unset header cmd-info cmd
@@ -251,24 +251,24 @@ function git-install() {
 ####### Configurations #######
 ##############################
 
-function config-all() {
-  prompt-confirm "${blue}Config Tmux${reset}" && config-tmux
-  prompt-confirm "${blue}Config Nvim${reset}" && config-nvim
-  prompt-confirm "${blue}Config Git${reset}" && config-git
-  prompt-confirm "${blue}Config Kitty${reset}" && config-kitty
+function c-all() {
+  prompt-confirm "${blue}Config Tmux${reset}" && c-tmux
+  prompt-confirm "${blue}Config Nvim${reset}" && c-nvim
+  prompt-confirm "${blue}Config Git${reset}" && c-git
+  prompt-confirm "${blue}Config Kitty${reset}" && c-kitty
 }
 
-function config-tmux() {
+function c-tmux() {
   link ~/.otcova-setup/config/tmux.conf ~/.tmux.conf
   git-install 'https://github.com/tmux-plugins/tpm' ~/.tmux/plugins/tpm
 }
 
-function config-nvim() {
+function c-nvim() {
   git-install https://github.com/LazyVim/starter ~/.config/nvim
   link ~/.otcova-setup/config/nvim.lua ~/.config/nvim/lua/plugins/otcova.lua
 }
 
-function config-kitty() {
+function c-kitty() {
   wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
   link ~/.local/kitty.app/bin/kitty ~/.bin/kitty
@@ -277,7 +277,7 @@ function config-kitty() {
   link ~/.otcova-setup/config/kitty ~/.config/kitty
 }
 
-function config-git() {
+function c-git() {
   # Config delta (git diff)
   git config --global core.pager delta
   git config --global interactive.diffFilter 'delta --color-only'
@@ -375,7 +375,7 @@ function otcova-update() {
 
 function otcova-install() {
   _otcova-add-rc-hook
-  config-all
+  c-all
 }
 
 function otcova-uninstall() {
