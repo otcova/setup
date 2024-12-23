@@ -243,12 +243,10 @@ function git-install() {
 ##############################
 
 function config-all() {
-  echo "${blue}Tmux${reset}"
-  config-tmux
-  echo "${blue}Nvim${reset}"
-  config-nvim
-  echo "${blue}Kitty${reset}"
-  config-kitty
+  prompt-confirm "${blue}Config Tmux${reset}" && config-tmux
+  prompt-confirm "${blue}Config Nvim${reset}" && config-nvim
+  prompt-confirm "${blue}Config Git${reset}" && config-git
+  prompt-confirm "${blue}Config Kitty${reset}" && config-kitty
 }
 
 function config-tmux() {
