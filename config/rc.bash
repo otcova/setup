@@ -318,7 +318,7 @@ function config-git() {
 
   if [ -e "$key_path" ]; then
     chmod 600 "$key_path"
-    git config core.sshCommand "ssh -i '${key_path}'"
+    git config --global core.sshCommand "ssh -i '${key_path}'"
   else
     echo "${red}[ERROR]${reset} Ssh key '$key_path' not found"
   fi
