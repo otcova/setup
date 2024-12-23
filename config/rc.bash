@@ -440,8 +440,7 @@ fi
 ######################################
 ####### Open tmux main session #######
 ######################################
-
-if [ -z "$TMUX" ]; then
-  tmux-main
-  exit
-fi
+# if [ -z "$TMUX" ]; then
+#   tmux-main
+#   exit
+# fi
