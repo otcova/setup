@@ -23,6 +23,8 @@ if [ "$(tput colors)" -ge 8 ]; then
   purple=$'\e[1;35m'
   cyan=$'\e[1;36m'
   white=$'\e[1;37m'
+
+  alias ls='ls --color=auto'
 fi
 
 #####################
@@ -42,14 +44,14 @@ function cmd() {
   alias "${aliasName[0]}"="$3"
 }
 
-header 'Setup Program Configurations'
-cmd-info 'config-all'
-cmd-info 'config-tmux'
-cmd-info 'config-nvim'
-cmd-info 'config-git'
-cmd-info 'config-kitty'
+header 'Configure Program'
+cmd-info 'c-all'
+cmd-info 'c-tmux'
+cmd-info 'c-nvim'
+cmd-info 'c-git'
+cmd-info 'c-kitty'
 
-header 'Grep Aliases'
+header 'Search'
 cmd 'hs <regex> ' '# History search' 'cat ~/.bash_history | rg'
 cmd 'fs <regex> ' '# File search' 'rg --files | rg'
 
@@ -58,6 +60,7 @@ cmd 'ga         ' '# add, commit' 'git add . && git commit --message'
 cmd 'gp         ' '# pull, push' 'git pull && git push'
 cmd 'gs         ' '# status' 'git status'
 cmd 'gb         ' '# branch' 'git branch'
+cmd 'gd         ' '# diff' 'git diff'
 cmd 'glog       ' '# log' 'git log --pretty="format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s" --date="relative"'
 cmd 'gpull      ' '# pull' 'git pull'
 cmd 'gpush      ' '# push' 'git push'
@@ -66,8 +69,9 @@ header 'Vim'
 cmd-info 'v          ' '# cd, nvim'
 
 header 'Fast Edit'
-cmd 'setup      ' '# v ~/.otcova-setup' "nvim $HOME/.otcova-setup"
-cmd 'rc         ' '# v ~/.otcova-setup/rc.bash' "nvim $HOME/.otcova-setup/rc.bash"
+cmd 'setup      ' '# nvim ~/.otcova-setup' 'nvim $HOME/.otcova-setup'
+cmd 'rc         ' '# nvim ~/.otcova-setup/rc.bash' 'nvim $HOME/.otcova-setup/rc.bash'
+cmd 'brc        ' '# nvim ~/.bashrc' 'nvim $HOME/.bashrc'
 
 header 'Directories'
 cmd 'h          ' '# ~' 'cd ~'
@@ -86,7 +90,12 @@ cmd-info 'delta      ' '# Source: https://github.com/dandavison/delta/releases/t
 cmd-info 'lg         ' '# Source: https://github.com/jesseduffield/lazygit/releases/tag/v0.44.1 (lazygit_0.44.1_Linux_x86_64.tar.gz)'
 cmd-info 'yazi       ' '# Source: https://github.com/sxyazi/yazi/releases/tag/v0.4.2 (yazi-x86_64-unknown-linux-gnu.zip)'
 
-alias otcova='. ${HOME}/.otcova-setup/config/rc.bash ; echo "${OTCOVA_HELP}" | less -r'
+header 'Otcova Setup'
+cmd 'otcova           ' '# Reload rc and show help' '. ${HOME}/.otcova-setup/config/rc.bash ; echo "${OTCOVA_HELP}" | less -r'
+cmd-info 'otcova-update    ' '# Update and reload'
+cmd-info 'otcova-install   ' '# Sets up the rc and starts config-all'
+cmd-info 'otcova-uninstall ' '# Removes ~/.otcova-setup'
+
 unset header cmd-info cmd
 
 #########################
@@ -316,31 +325,42 @@ function config-git() {
 }
 
 function _otcova-add-rc-hook() {
-  config_line=". '${HOME}/.otcova-setup/config/rc.bash'"
+  config_line='. ~/.otcova-setup/config/rc.bash'
+  rc_hook_comment='# Source the otcova setup rc here'
 
-  case "$0" in
-  *zsh*) rc_file="${HOME}/.zshrc" ;;
-  *tcsh*) rc_file="${HOME}/.tcshrc" ;;
-  *) rc_file="${HOME}/.bashrc" ;;
-  esac
+  rc_hook_comment_found=false
 
-  if [ -e "$rc_file" ]; then
-    if ! grep -q "$config_line" "$rc_file"; then
+  for rc_file_name in .bashrc .zshrc .tcshrc; do
+    rc_file="${HOME}/${rc_file_name}"
+
+    if grep -Fxq "$rc_hook_comment" "$rc_file" 2>/dev/null; then
+      rc_hook_comment_found=true
+      sed -i "s|^$rc_hook_comment$|$config_line|" "$rc_file"
+    fi
+  done
+
+  # If no rc_hook_comment_found, add the config_line to the currect rc file
+  if ! "$rc_hook_comment_found"; then
+    case "$0" in
+    *zsh*) rc_file="${HOME}/.zshrc" ;;
+    *tcsh*) rc_file="${HOME}/.tcshrc" ;;
+    *) rc_file="${HOME}/.bashrc" ;;
+    esac
+
+    if ! grep -Fxq "$config_line" "$rc_file"; then
       echo "$config_line" >>"$rc_file"
     fi
-  else
-    echo "$config_line" >"$rc_file"
   fi
 }
 
 function _otcova-remove-rc-hook() {
-  config_line=". '${HOME}/.otcova-setup/config/rc.bash'"
+  config_line='. ~/.otcova-setup/config/rc.bash'
+  rc_hook_comment='# Source the otcova setup rc here'
 
   for rc_file_name in .bashrc .zshrc .tcshrc; do
     rc_file="${HOME}/${rc_file_name}"
     if [ -e "${rc_file}" ]; then
-      grep -Fvx "${config_line}" "${rc_file}" >"${rc_file}.tmp"
-      mv "${rc_file}.tmp" "${rc_file}"
+      sed -i "s|^$config_line$|$rc_hook_comment|" "$rc_file"
     fi
   done
 }
@@ -351,6 +371,25 @@ function otcova-update() {
   _otcova-remove-rc-hook
   . "${HOME}/.otcova-setup/config/rc.bash"
   _otcova-add-rc-hook
+}
+
+function otcova-install() {
+  _otcova-add-rc-hook
+  config-all
+}
+
+function otcova-uninstall() {
+  rm -rf ~/.otcova-setup
+
+  config_line='. ~/.otcova-setup/config/rc.bash'
+
+  for rc_file_name in .bashrc .zshrc .tcshrc; do
+    rc_file="${HOME}/${rc_file_name}"
+    if [ -e "${rc_file}" ]; then
+      grep -xvF "$config_line" "$rc_file" >"${rc_file}.grep.temp"
+      mv "${rc_file}.grep.temp" "$rc_file"
+    fi
+  done
 }
 
 ######################
