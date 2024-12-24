@@ -270,12 +270,12 @@ function c-nvim() {
 }
 
 function c-kitty() {
+  link ~/.otcova-setup/config/kitty ~/.config/kitty
+
   wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
   link ~/.local/kitty.app/bin/kitty ~/.bin/kitty
   link ~/.local/kitty.app/bin/kitten ~/.bin/kitten
-
-  link ~/.otcova-setup/config/kitty ~/.config/kitty
 }
 
 function c-git() {
