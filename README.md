@@ -24,7 +24,8 @@ hs <regex> # History search
 fs <regex> # File search
 
 Git Aliases
-ga         # add, commit
+ga <msg>   # add all, commit
+gc <msg>   # commit
 gp         # pull, push
 gs         # status
 gb         # branch
@@ -61,6 +62,6 @@ yazi       # Source: https://github.com/sxyazi/yazi/releases/tag/v0.4.2 (yazi-x8
 Otcova Setup
 otcova           # Reload rc and show help
 otcova-update    # Update and reload
-otcova-install   # Sets up the rc and starts config-all
+otcova-install   # Sets up the rc and starts c-all
 otcova-uninstall # Removes ~/.otcova-setup
 ```
