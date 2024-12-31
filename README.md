@@ -39,7 +39,7 @@ v          # cd, nvim
 
 Fast Edit
 setup      # nvim ~/.otcova-setup
-rc         # nvim ~/.otcova-setup/rc.bash
+rc         # nvim ~/.otcova-setup/config/rc.bash
 brc        # nvim ~/.bashrc
 
 Directories

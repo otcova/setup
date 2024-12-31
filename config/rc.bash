@@ -1,5 +1,11 @@
 #!/bin/bash
 
+######################
+######### Path #######
+######################
+
+PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH"
+
 #######################################
 ####### Continue if Interactive #######
 #######################################
@@ -33,7 +39,8 @@ fi
 
 OTCOVA_HELP=''
 function header() {
-  OTCOVA_HELP+=$'\n'$blue"$1"$reset$'\n'
+  [ -n "$OTCOVA_HELP" ] && OTCOVA_HELP+=$'\n'
+  OTCOVA_HELP+=$blue"$1"$reset$'\n'
 }
 function cmd-info() {
   OTCOVA_HELP+="$1"$green"$2"$reset$'\n'
@@ -71,7 +78,7 @@ cmd-info 'v          ' '# cd, nvim'
 
 header 'Fast Edit'
 cmd 'setup      ' '# nvim ~/.otcova-setup' 'nvim $HOME/.otcova-setup'
-cmd 'rc         ' '# nvim ~/.otcova-setup/rc.bash' 'nvim $HOME/.otcova-setup/rc.bash'
+cmd 'rc         ' '# nvim ~/.otcova-setup/config/rc.bash' 'nvim $HOME/.otcova-setup/config/rc.bash'
 cmd 'brc        ' '# nvim ~/.bashrc' 'nvim $HOME/.bashrc'
 
 header 'Directories'
@@ -92,7 +99,7 @@ cmd-info 'lg         ' '# Source: https://github.com/jesseduffield/lazygit/relea
 cmd-info 'yazi       ' '# Source: https://github.com/sxyazi/yazi/releases/tag/v0.4.2 (yazi-x86_64-unknown-linux-gnu.zip)'
 
 header 'Otcova Setup'
-cmd 'otcova           ' '# Reload rc and show help' '. ${HOME}/.otcova-setup/config/rc.bash ; echo "${OTCOVA_HELP}" | less -r'
+cmd-info 'otcova           ' '# Reload rc and show help'
 cmd-info 'otcova-update    ' '# Update and reload'
 cmd-info 'otcova-install   ' '# Sets up the rc and starts c-all'
 cmd-info 'otcova-uninstall ' '# Removes ~/.otcova-setup'
@@ -231,8 +238,9 @@ function v() {
 
 function tmux-main() {
   if [ -z "$TMUX" ]; then
-    tmux a -t main 2>/dev/null || tmux new -s main \; new-window \; select-window -t 0 >/dev/null
-    exit
+    if ! tmux a -t main 2>/dev/null; then
+      tmux new -s main \; new-window \; select-window -t 0 >/dev/null
+    fi
   fi
 }
 
@@ -373,6 +381,20 @@ function _otcova-remove-rc-hook() {
   done
 }
 
+function otcova() {
+  . ${HOME}/.otcova-setup/config/rc.bash
+
+  # update README.md with new possibly new $OTCOVA_HELP
+  new_help="$(echo "$OTCOVA_HELP" | sed 's/\x1b\[[0-9;]*m//g')"
+
+  sed -i '/```python/,$d' ~/.otcova-setup/README.md # Delete old_help
+  echo '```python' >>~/.otcova-setup/README.md
+  echo "$new_help" >>~/.otcova-setup/README.md
+  echo '```' >>~/.otcova-setup/README.md
+
+  echo "$OTCOVA_HELP" | less -r
+}
+
 function otcova-update() {
   git -C ~/.otcova-setup pull
 
@@ -425,12 +447,6 @@ function _lazy_autocomplete() {
 for command in fd rg bat yazi; do
   complete -F _lazy_autocomplete -o bashdefault -o default $command
 done
-
-######################
-######### Path #######
-######################
-
-PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH"
 
 #####################
 ####### Fixes #######
