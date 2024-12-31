@@ -79,7 +79,7 @@ cmd 'h          ' '# ~' 'cd ~'
 cmd 'd          ' '# ~/Desktop/' 'cd ~/Desktop/'
 
 header 'Tmux'
-cmd 'tmux-main  ' '# Main tmux session' 'tmux a -t main 2>/dev/null || tmux new -s main \; new-window \; select-window -t 0 >/dev/null'
+cmd-info 'tmux-main  ' '# Main tmux session'
 
 header 'Binaries'
 cmd-info 'nvim       ' '# Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)'
@@ -226,6 +226,13 @@ function v() {
   else
     cd "$1"
     nvim .
+  fi
+}
+
+function tmux-main() {
+  if [ -z "$TMUX" ]; then
+    tmux a -t main 2>/dev/null || tmux new -s main \; new-window \; select-window -t 0 >/dev/null
+    exit
   fi
 }
 
@@ -442,7 +449,6 @@ fi
 ####### Open tmux main session #######
 ######################################
 
-if [ -z "$TMUX" ] && [ "$TERM" = "xterm-kitty" ]; then
+if [ "$TERM" = "xterm-kitty" ]; then
   tmux-main
-  exit
 fi
