@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if command -v rustup; then
+  rustup component add rust-analyzer
+  rustup update
+else
+  if command -v cargo; then
+    if ! prompt-connfirm 'Want to install rustup'; then
+      exit
+    fi
+  fi
+
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+fi

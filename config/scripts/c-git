@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Config delta (git diff)
+git config --global core.pager delta
+git config --global interactive.diffFilter 'delta --color-only'
+git config --global merge.conflictStyle zdiff3
+git config --global delta.navigate true
+git config --global delta.side-by-side true
+
+# Use nvim
+git config --global core.editor nvim
+
+# Set user
+REPLY="$(prompt-str "Git user.name" "$(git config --global user.name)")"
+git config --global user.name "$REPLY"
+REPLY="$(prompt-str "Git user.email" "$(git config --global user.email)")"
+git config --global user.email "$REPLY"
+
+# Set up ssh keys
+current_ssh="$(git config --global core.sshCommand)"
+if [ ! -z "$current_ssh" ]; then
+  if ! prompt-confirm "Change configured ssh '${current_ssh}'"; then
+    exit
+  fi
+fi
+
+key_path=''
+if prompt-confirm 'Generate new ssh keys'; then
+  key_path="$(prompt-path 'Enter file in which to save the key' "$HOME/.ssh/id_ed25519")"
+  if ! ask-rm "$key_path"; then
+    exit
+  fi
+  mkdir -p "$(dirname -- "$key_path")"
+  ssh-keygen -q -t ed25519 -C "$(git config --global user.email)" -f "$key_path"
+else
+  key_path="$(prompt-path 'Enter key path' "$HOME/.ssh/id_rsa")"
+fi
+
+if [ -e "$key_path" ]; then
+  chmod 600 "$key_path"
+  git config --global core.sshCommand "ssh -i '${key_path}'"
+else
+  echo "${red}[ERROR]${reset} Ssh key '$key_path' not found"
+fi

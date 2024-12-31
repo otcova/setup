@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/sh
 
 ######################
 ######### Path #######
 ######################
 
-PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH"
+PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH:$HOME/.otcova-setup/scripts:$HOME/.otcova-setup/config/scripts"
 
 #######################################
 ####### Continue if Interactive #######
@@ -58,6 +58,9 @@ cmd-info 'c-nvim'
 cmd-info 'c-git'
 cmd-info 'c-kitty'
 
+header 'Configure LSP'
+cmd-info 'c-rust'
+
 header 'Search'
 cmd 'hs <regex> ' '# History search' 'cat ~/.bash_history | rg'
 cmd 'fs <regex> ' '# File search' 'rg --files | rg'
@@ -110,123 +113,6 @@ unset header cmd-info cmd
 ####### Functions #######
 #########################
 
-function prompt-path() {
-  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
-    echo "Usage:"
-    echo "  prompt-path [<prompt>] [<default>]"
-    echo ""
-    echo 'The resulting value is stored in $REPLY'
-    echo ""
-    echo "Example:"
-    echo "  > prompt-str 'Enter a path' '~/.config'"
-    echo "  Enter a path (~/.config):"
-    return
-  fi
-
-  prompt=""
-  if [ ! -z "$1" ]; then
-    if [ -z "$2" ]; then
-      prompt="${1}: "
-    else
-      prompt="${1} (${2}): "
-    fi
-  fi
-
-  read -rep "$prompt"
-  REPLY="${REPLY:-"$2"}"
-  REPLY="${REPLY/#\~/$HOME}" # Expand ~ to home
-}
-
-function prompt-str() {
-  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
-    echo "Usage:"
-    echo "  prompt-str [<prompt>] [<default>]"
-    echo ""
-    echo 'The resulting value is stored in $REPLY'
-    echo ""
-    echo "Example:"
-    echo "  > prompt-str 'Enter name' 'Richard'"
-    echo "  Enter name (Richard):"
-    return
-  fi
-
-  prompt=""
-  if [ ! -z "$1" ]; then
-    if [ -z "$2" ]; then
-      prompt="${1}: "
-    else
-      prompt="${1} (${2}): "
-    fi
-  fi
-
-  read -rp "$prompt"
-  REPLY="${REPLY:-"$2"}"
-}
-
-function prompt-confirm() {
-  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 1 ]; then
-    echo "Usage:"
-    echo "  prompt-confirm <prompt>"
-    echo ""
-    echo 'The resulting value is stored in $REPLY'
-    echo ""
-    echo "Example:"
-    echo "  > prompt-confirm 'Are you sure'"
-    echo "  Are you sure (yes)?"
-    return
-  fi
-
-  read -rn 1 -p "${1} (yes)? "
-  if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
-    echo 'es'
-  elif [ ! -z "$REPLY" ]; then
-    echo ''
-    return 1
-  fi
-}
-
-function ask-rm() {
-  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 1 ]; then
-    echo "Usage:"
-    echo "  ask-rm <path>"
-    echo ""
-    echo "Asks for confirmation and then 'rm -rf <path>'"
-    echo "If <path> does not exists, it does nothing"
-    return
-  fi
-
-  if [ -e "$1" ] || [ -L "$1" ]; then
-    if prompt-confirm "Override file ${blue}${1}${reset}"; then
-      rm -rf "$1"
-    else
-      return 1
-    fi
-  fi
-}
-
-function link() {
-  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
-    echo "Usage:"
-    echo "  link [<src>] [<dst>]"
-    echo ""
-    echo "<src> default value is $PWD"
-    echo "<dst> default value is $HOME/Desktop/<src-basename>"
-    return
-  fi
-
-  src="${1:-$PWD}"
-  dst="${2:-$HOME/Desktop/$(basename -- "$src")}"
-
-  if [ "$src" -ef "$dst" ]; then
-    return # File exists and is correct, do nothing
-  fi
-
-  if ask-rm "$dst"; then
-    mkdir -p "$(dirname -- "$dst")"
-    ln -s "$src" "$dst"
-  fi
-}
-
 function v() {
   if [ -f "$1" ]; then
     nvim "$1"
@@ -244,101 +130,9 @@ function tmux-main() {
   fi
 }
 
-function git-install() {
-  if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 2 ]; then
-    echo "Usage:"
-    echo "  git-install <repo-url> <dst>"
-    echo ""
-    echo "It will"
-    echo "  - git pull  $green# If <dst> is a git repository with origin <repo-url>$reset"
-    echo "  - ask-rm <dst>, git clone $green  # If <dst> is not a git repository with origin <repo-url>$reset"
-    return
-  fi
-
-  if [ "$(git -C "$2" remote get-url origin 2>/dev/null)" = "$1" ]; then
-    git pull
-  else
-    ask-rm "$2"
-    git clone "$1" "$2"
-  fi
-}
-
 ##############################
 ####### Configurations #######
 ##############################
-
-function c-all() {
-  prompt-confirm "${blue}Config Tmux${reset}" && c-tmux
-  prompt-confirm "${blue}Config Nvim${reset}" && c-nvim
-  prompt-confirm "${blue}Config Git${reset}" && c-git
-  prompt-confirm "${blue}Config Kitty${reset}" && c-kitty
-}
-
-function c-tmux() {
-  link ~/.otcova-setup/config/tmux.conf ~/.tmux.conf
-  git-install 'https://github.com/tmux-plugins/tpm' ~/.tmux/plugins/tpm
-}
-
-function c-nvim() {
-  git-install https://github.com/LazyVim/starter ~/.config/nvim
-  link ~/.otcova-setup/config/nvim.lua ~/.config/nvim/lua/plugins/otcova.lua
-}
-
-function c-kitty() {
-  link ~/.otcova-setup/config/kitty ~/.config/kitty
-
-  wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
-
-  link ~/.local/kitty.app/bin/kitty ~/.bin/kitty
-  link ~/.local/kitty.app/bin/kitten ~/.bin/kitten
-}
-
-function c-git() {
-  # Config delta (git diff)
-  git config --global core.pager delta
-  git config --global interactive.diffFilter 'delta --color-only'
-  git config --global merge.conflictStyle zdiff3
-  git config --global delta.navigate true
-  git config --global delta.side-by-side true
-
-  # Use nvim
-  git config --global core.editor nvim
-
-  # Set user
-  prompt-str "Git user.name" "$(git config --global user.name)"
-  git config --global user.name "$REPLY"
-  prompt-str "Git user.email" "$(git config --global user.email)"
-  git config --global user.email "$REPLY"
-
-  # Set up ssh keys
-  current_ssh="$(git config --global core.sshCommand)"
-  if [ ! -z "$current_ssh" ]; then
-    if ! prompt-confirm "Change configured ssh '${current_ssh}'"; then
-      return
-    fi
-  fi
-
-  key_path=''
-  if prompt-confirm 'Generate new ssh keys'; then
-    prompt-path 'Enter file in which to save the key' "$HOME/.ssh/id_ed25519"
-    key_path="$REPLY"
-    if ! ask-rm "$key_path"; then
-      return
-    fi
-    mkdir -p "$(dirname -- "$key_path")"
-    ssh-keygen -q -t ed25519 -C "$(git config --global user.email)" -f "$key_path"
-  else
-    prompt-path 'Enter key path' "$HOME/.ssh/id_rsa"
-    key_path="$REPLY"
-  fi
-
-  if [ -e "$key_path" ]; then
-    chmod 600 "$key_path"
-    git config --global core.sshCommand "ssh -i '${key_path}'"
-  else
-    echo "${red}[ERROR]${reset} Ssh key '$key_path' not found"
-  fi
-}
 
 function _otcova-add-rc-hook() {
   config_line='. ~/.otcova-setup/config/rc.bash'

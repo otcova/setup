@@ -1,0 +1,6 @@
+#!/bin/sh
+
+prompt-confirm "${blue}Config Tmux${reset}" && c-tmux
+prompt-confirm "${blue}Config Nvim${reset}" && c-nvim
+prompt-confirm "${blue}Config Git${reset}" && c-git
+prompt-confirm "${blue}Config Kitty${reset}" && c-kitty

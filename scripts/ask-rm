@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 1 ]; then
+  echo "Usage:"
+  echo "  ask-rm <path>"
+  echo ""
+  echo "Asks for confirmation and then 'rm -rf <path>'"
+  echo "If <path> does not exists, it does nothing"
+  exit
+fi
+
+if [ -e "$1" ] || [ -L "$1" ]; then
+  if prompt-confirm "Override file ${blue}${1}${reset}"; then
+    rm -rf "$1"
+  else
+    exit 1
+  fi
+fi

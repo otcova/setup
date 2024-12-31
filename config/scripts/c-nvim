@@ -1,0 +1,4 @@
+#!/bin/sh
+
+git-install https://github.com/LazyVim/starter ~/.config/nvim
+ask-link ~/.otcova-setup/config/nvim.lua ~/.config/nvim/lua/plugins/otcova.lua

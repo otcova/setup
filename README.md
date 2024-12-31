@@ -19,6 +19,9 @@ c-nvim
 c-git
 c-kitty
 
+Configure LSP
+c-rust
+
 Search
 hs <regex> # History search
 fs <regex> # File search

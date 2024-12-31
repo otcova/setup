@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
+  echo 'Usage:'
+  echo '  reply="$(prompt-str [<prompt>] [<default-value>])"'
+  echo ''
+  echo 'Example:'
+  echo '  > reply="$(prompt-str "Enter name" "Richard")"'
+  echo '  Enter name (Richard): pato'
+  echo '  > echo "$reply"'
+  echo '  pato'
+  exit
+fi
+
+prompt=""
+if [ ! -z "$1" ]; then
+  if [ -z "$2" ]; then
+    prompt="${1}: "
+  else
+    prompt="${1} (${2}): "
+  fi
+fi
+
+echo -n "$prompt" >&2
+read -r REPLY
+echo "${REPLY:-"$2"}"

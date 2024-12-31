@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
+  echo "Usage:"
+  echo "  ask-link [<src>] [<dst>]"
+  echo ""
+  echo "<src> default value is $PWD"
+  echo "<dst> default value is $HOME/Desktop/<src-basename>"
+  exit
+fi
+
+src="${1:-$PWD}"
+dst="${2:-$HOME/Desktop/$(basename -- "$src")}"
+
+if [ "$src" -ef "$dst" ]; then
+  exit # File exists and is correct, do nothing
+fi
+
+if ask-rm "$dst"; then
+  mkdir -p "$(dirname -- "$dst")"
+  ln -s "$src" "$dst"
+fi

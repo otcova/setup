@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 2 ]; then
+  echo "Usage:"
+  echo "  git-install <repo-url> <dst>"
+  echo ""
+  echo "It will"
+  echo "  - git pull  $green# If <dst> is a git repository with origin <repo-url>$reset"
+  echo "  - ask-rm <dst>, git clone $green  # If <dst> is not a git repository with origin <repo-url>$reset"
+  exit
+fi
+
+if [ "$(git -C "$2" remote get-url origin 2>/dev/null)" = "$1" ]; then
+  git -C "$2" pull
+else
+  ask-rm "$2"
+  git clone "$1" "$2"
+fi

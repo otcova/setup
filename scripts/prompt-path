@@ -1,0 +1,37 @@
+#!/bin/sh
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ge 3 ]; then
+  echo 'Usage:'
+  echo '  reply="$(prompt-path [<prompt>] [<default>])"'
+  echo ''
+  echo 'The resulting value is stored in $REPLY'
+  echo ''
+  echo 'Example:'
+  echo '  > reply="$(prompt-path "Enter a path" "~/.config")"'
+  echo '  Enter a path (~/.config): potato'
+  echo '  > echo "$reply"'
+  echo '  potato'
+  exit
+fi
+
+prompt=""
+if [ ! -z "$1" ]; then
+  if [ -z "$2" ]; then
+    prompt="${1}: "
+  else
+    prompt="${1} (${2}): "
+  fi
+fi
+
+echo -n "$prompt" >&2
+
+if command -v bash >/dev/null 2>&1; then
+  REPLY="$(bash -c 'read -re && echo $REPLY')"
+else
+  read -r REPLY
+fi
+
+REPLY="${REPLY:-"$2"}"
+REPLY=$(echo "$REPLY" | sed "s|^~|$HOME|") # Expand ~ to home
+
+echo "$REPLY"

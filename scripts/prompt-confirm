@@ -1,0 +1,32 @@
+#!/bin/sh
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$#" -ne 1 ]; then
+  echo "Usage:"
+  echo "  prompt-confirm <prompt>"
+  echo ""
+  echo 'The resulting value is stored in $REPLY'
+  echo ""
+  echo "Example:"
+  echo "  > prompt-confirm 'Are you sure' && echo 'Removing All' || echo 'Aborted'"
+  echo "  Are you sure (yes)?"
+  echo "  Removing All"
+  echo ""
+  echo "  > prompt-confirm 'Are you sure' && echo 'Removing All' || echo 'Aborted'"
+  echo "  Are you sure (yes)? n"
+  echo "  Aborted"
+  exit
+fi
+
+echo -n "${1} (yes)? "
+
+trap 'stty icanon' EXIT
+stty -icanon
+REPLY=$(dd bs=1 count=1 2>/dev/null)
+stty icanon
+
+if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
+  echo 'es'
+elif [ ! -z "$REPLY" ]; then
+  echo ''
+  exit 1
+fi

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+ask-link ~/.otcova-setup/config/kitty ~/.config/kitty
+
+wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+
+ask-link ~/.local/kitty.app/bin/kitty ~/.bin/kitty
+ask-link ~/.local/kitty.app/bin/kitten ~/.bin/kitten
