@@ -23,8 +23,9 @@ Configure LSP
 c-rust
 
 Search
-hs <regex> # History search
-fs <regex> # File search
+hs  <regex> # History search
+fs  <regex> # File search
+pss <regex> # Process search
 
 Git Aliases
 ga <msg>   # add all, commit
@@ -39,18 +40,25 @@ gpush      # push
 
 Vim
 v          # cd, nvim
+vc         # cd ~/.config/nvim, nvim
 
 Fast Edit
-setup      # nvim ~/.otcova-setup
-rc         # nvim ~/.otcova-setup/config/rc.bash
+rc         # cd otcova-setup, nvim ~/.otcova-setup/config/rc.bash
 brc        # nvim ~/.bashrc
 
 Directories
 h          # ~
 d          # ~/Desktop/
+sp         # Stack push/pop directory
 
 Tmux
 tmux-main  # Main tmux session
+
+Otcova Setup
+otcova           # Reload rc and show help
+otcova-update    # Update and reload
+otcova-install   # Sets up the rc and starts c-all
+otcova-uninstall # Removes ~/.otcova-setup
 
 Binaries
 nvim       # Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)
@@ -61,10 +69,4 @@ fzf        # Source: https://github.com/junegunn/fzf/releases/tag/v0.57.0 (fzf-0
 delta      # Source: https://github.com/dandavison/delta/releases/tag/0.18.2 (delta-0.18.2-x86_64-unknown-linux-gnu.tar.gz)
 lg         # Source: https://github.com/jesseduffield/lazygit/releases/tag/v0.44.1 (lazygit_0.44.1_Linux_x86_64.tar.gz)
 yazi       # Source: https://github.com/sxyazi/yazi/releases/tag/v0.4.2 (yazi-x86_64-unknown-linux-gnu.zip)
-
-Otcova Setup
-otcova           # Reload rc and show help
-otcova-update    # Update and reload
-otcova-install   # Sets up the rc and starts c-all
-otcova-uninstall # Removes ~/.otcova-setup
 ```

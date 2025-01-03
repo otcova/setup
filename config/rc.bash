@@ -42,28 +42,28 @@ function header() {
   [ -n "$OTCOVA_HELP" ] && OTCOVA_HELP+=$'\n'
   OTCOVA_HELP+=$blue"$1"$reset$'\n'
 }
-function cmd-info() {
-  OTCOVA_HELP+="$1"$green"$2"$reset$'\n'
-}
 function cmd() {
-  cmd-info "$1" "$2"
-  aliasName=($1)
-  alias "${aliasName[0]}"="$3"
+  OTCOVA_HELP+="$1"$green"$2"$reset$'\n'
+  if [ -n "$3" ]; then
+    aliasName=($1)
+    alias "${aliasName[0]}"="$3"
+  fi
 }
 
 header 'Configure Program'
-cmd-info 'c-all'
-cmd-info 'c-tmux'
-cmd-info 'c-nvim'
-cmd-info 'c-git'
-cmd-info 'c-kitty'
+cmd 'c-all'
+cmd 'c-tmux'
+cmd 'c-nvim'
+cmd 'c-git'
+cmd 'c-kitty'
 
 header 'Configure LSP'
-cmd-info 'c-rust'
+cmd 'c-rust'
 
 header 'Search'
-cmd 'hs <regex> ' '# History search' 'cat ~/.bash_history | rg'
-cmd 'fs <regex> ' '# File search' 'rg --files | rg'
+cmd 'hs  <regex> ' '# History search' 'cat ~/.bash_history | rg'
+cmd 'fs  <regex> ' '# File search' 'rg --files | rg'
+cmd 'pss <regex> ' '# Process search' 'ps -A | rg'
 
 header 'Git Aliases'
 cmd 'ga <msg>   ' '# add all, commit' 'git add -A && git commit --message'
@@ -77,37 +77,38 @@ cmd 'gpull      ' '# pull' 'git pull'
 cmd 'gpush      ' '# push' 'git push'
 
 header 'Vim'
-cmd-info 'v          ' '# cd, nvim'
+cmd 'v          ' '# cd, nvim'
+cmd 'vc         ' '# cd ~/.config/nvim, nvim' 'sp ~/.config/nvim/ && nvim lua/plugins/otcova.lua'
 
 header 'Fast Edit'
-cmd 'setup      ' '# nvim ~/.otcova-setup' 'nvim $HOME/.otcova-setup'
-cmd 'rc         ' '# nvim ~/.otcova-setup/config/rc.bash' 'nvim $HOME/.otcova-setup/config/rc.bash'
+cmd 'rc         ' '# cd otcova-setup, nvim ~/.otcova-setup/config/rc.bash' 'sp "$HOME/.otcova-setup" && nvim ./config/rc.bash'
 cmd 'brc        ' '# nvim ~/.bashrc' 'nvim $HOME/.bashrc'
 
 header 'Directories'
 cmd 'h          ' '# ~' 'cd ~'
 cmd 'd          ' '# ~/Desktop/' 'cd ~/Desktop/'
+cmd 'sp         ' '# Stack push/pop directory'
 
 header 'Tmux'
-cmd-info 'tmux-main  ' '# Main tmux session'
-
-header 'Binaries'
-cmd-info 'nvim       ' '# Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)'
-cmd-info 'rg         ' '# Source: https://github.com/BurntSushi/ripgrep/releases/tag/14.1.1 (ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz)'
-cmd-info 'fd         ' '# Source: https://github.com/sharkdp/fd/releases/tag/v10.2.0 (fd-v10.2.0-x86_64-unknown-linux-gnu.tar.gz)'
-cmd-info 'bat        ' '# Source: https://github.com/sharkdp/bat/releases/tag/v0.24.0 (bat-v0.24.0-x86_64-unknown-linux-gnu.tar.gz)'
-cmd-info 'fzf        ' '# Source: https://github.com/junegunn/fzf/releases/tag/v0.57.0 (fzf-0.57.0-linux_amd64.tar.gz)'
-cmd-info 'delta      ' '# Source: https://github.com/dandavison/delta/releases/tag/0.18.2 (delta-0.18.2-x86_64-unknown-linux-gnu.tar.gz)'
-cmd-info 'lg         ' '# Source: https://github.com/jesseduffield/lazygit/releases/tag/v0.44.1 (lazygit_0.44.1_Linux_x86_64.tar.gz)'
-cmd-info 'yazi       ' '# Source: https://github.com/sxyazi/yazi/releases/tag/v0.4.2 (yazi-x86_64-unknown-linux-gnu.zip)'
+cmd 'tmux-main  ' '# Main tmux session'
 
 header 'Otcova Setup'
-cmd-info 'otcova           ' '# Reload rc and show help'
-cmd-info 'otcova-update    ' '# Update and reload'
-cmd-info 'otcova-install   ' '# Sets up the rc and starts c-all'
-cmd-info 'otcova-uninstall ' '# Removes ~/.otcova-setup'
+cmd 'otcova           ' '# Reload rc and show help'
+cmd 'otcova-update    ' '# Update and reload'
+cmd 'otcova-install   ' '# Sets up the rc and starts c-all'
+cmd 'otcova-uninstall ' '# Removes ~/.otcova-setup'
 
-unset header cmd-info cmd
+header 'Binaries'
+cmd 'nvim       ' '# Source: https://github.com/neovim/neovim/releases/tag/v0.10.2 (nvim-linux64.tar.gz)'
+cmd 'rg         ' '# Source: https://github.com/BurntSushi/ripgrep/releases/tag/14.1.1 (ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz)'
+cmd 'fd         ' '# Source: https://github.com/sharkdp/fd/releases/tag/v10.2.0 (fd-v10.2.0-x86_64-unknown-linux-gnu.tar.gz)'
+cmd 'bat        ' '# Source: https://github.com/sharkdp/bat/releases/tag/v0.24.0 (bat-v0.24.0-x86_64-unknown-linux-gnu.tar.gz)'
+cmd 'fzf        ' '# Source: https://github.com/junegunn/fzf/releases/tag/v0.57.0 (fzf-0.57.0-linux_amd64.tar.gz)'
+cmd 'delta      ' '# Source: https://github.com/dandavison/delta/releases/tag/0.18.2 (delta-0.18.2-x86_64-unknown-linux-gnu.tar.gz)'
+cmd 'lg         ' '# Source: https://github.com/jesseduffield/lazygit/releases/tag/v0.44.1 (lazygit_0.44.1_Linux_x86_64.tar.gz)'
+cmd 'yazi       ' '# Source: https://github.com/sxyazi/yazi/releases/tag/v0.4.2 (yazi-x86_64-unknown-linux-gnu.zip)'
+
+unset header cmd
 
 #########################
 ####### Functions #######
@@ -117,8 +118,16 @@ function v() {
   if [ -f "$1" ]; then
     nvim "$1"
   else
-    cd "$1"
+    pushd "$1"
     nvim .
+  fi
+}
+
+function sp() {
+  if [ -z "$1" ]; then
+    popd >/dev/null
+  elif [ ! "$PWD" -ef "$1" ]; then
+    pushd "$1" >/dev/null
   fi
 }
 
