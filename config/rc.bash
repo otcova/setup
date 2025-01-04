@@ -258,10 +258,14 @@ done
 # Fix Ctrl-S Freeze
 stty -ixon
 
-# Fix WSL Wayland
+# WSL Fixes
 if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+  # Fix Wayland
   ln -s /mnt/wslg/runtime-dir/wayland-0 "/run/user/$UID" 2>/dev/null
   ln -s /mnt/wslg/runtime-dir/wayland-0.lock "/run/user/$UID" 2>/dev/null
+
+  # Fix Desktop Path
+  alias d='cd "/mnt/c/Users/$(cmd.exe /c "<nul set /p=%UserName%" 2> /dev/null)/Desktop"'
 fi
 
 ######################################
