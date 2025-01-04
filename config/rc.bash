@@ -118,7 +118,7 @@ function v() {
   if [ -f "$1" ]; then
     nvim "$1"
   else
-    pushd "$1"
+    pushd "$1" >/dev/null
     nvim .
   fi
 }
