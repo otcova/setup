@@ -85,8 +85,7 @@ cmd 'rc         ' '# cd otcova-setup, nvim ~/.otcova-setup/config/rc.bash' 'sp "
 cmd 'brc        ' '# nvim ~/.bashrc' 'nvim $HOME/.bashrc'
 
 header 'Directories'
-cmd 'h          ' '# ~' 'cd ~'
-cmd 'd          ' '# ~/Desktop/' 'cd ~/Desktop/'
+cmd 'd          ' '# ~/Desktop/'
 cmd 'sp         ' '# Stack push/pop directory'
 
 header 'Tmux'
@@ -121,6 +120,11 @@ function v() {
     pushd "$1" >/dev/null
     nvim .
   fi
+}
+
+function d() {
+  cd "$DESKTOP"
+  [ -n "$1" ] && cd "$1"
 }
 
 function sp() {
@@ -242,14 +246,16 @@ bind '"\C-s": clear-screen'
 ####### Load Autocomplete #######
 #################################
 
-function _lazy_autocomplete() {
-  . ~/.otcova-setup/autocomplete/"$1".bash
-  "_$1" "$@"
-}
+if [ -n "$(command -v complete)" ]; then
+  function _lazy_autocomplete() {
+    . ~/.otcova-setup/autocomplete/"$1".bash
+    "_$1" "$@"
+  }
 
-for command in fd rg bat yazi; do
-  complete -F _lazy_autocomplete -o bashdefault -o default $command
-done
+  for command in fd rg bat yazi d; do
+    complete -F _lazy_autocomplete -o bashdefault -o default $command
+  done
+fi
 
 #####################
 ####### Fixes #######
@@ -264,8 +270,9 @@ if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   ln -s /mnt/wslg/runtime-dir/wayland-0 "/run/user/$UID" 2>/dev/null
   ln -s /mnt/wslg/runtime-dir/wayland-0.lock "/run/user/$UID" 2>/dev/null
 
-  # Fix Desktop Path
-  alias d='cd "/mnt/c/Users/$(cmd.exe /c "<nul set /p=%UserName%" 2> /dev/null)/Desktop"'
+  DESKTOP="/mnt/c/Users/$(cmd.exe /c "<nul set /p=%UserName%" 2>/dev/null)/Desktop"
+else
+  DESKTOP="$(xdg-user-dir DESKTOP 2>/dev/null)" || DESKTOP="$HOME/Desktop"
 fi
 
 ######################################
