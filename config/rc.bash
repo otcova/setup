@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ######################
 ######### Path #######
@@ -57,6 +57,10 @@ cmd 'c-nvim'
 cmd 'c-git'
 cmd 'c-kitty'
 
+header 'Show help'
+cmd 'h-git'
+cmd 'h-bash'
+
 header 'Configure LSP'
 cmd 'c-rust'
 
@@ -72,7 +76,7 @@ cmd 'gp         ' '# pull, push' 'git pull --ff-only && git push'
 cmd 'gs         ' '# status' 'git status && git pull --ff-only'
 cmd 'gb         ' '# branch' 'git branch'
 cmd 'gd         ' '# diff' 'git diff'
-cmd 'glog       ' '# log' 'git log --pretty="format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s" --date="relative"'
+cmd 'gl         ' '# log' 'git log --pretty="format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s" --date="relative"'
 cmd 'gpull      ' '# pull' 'git pull'
 cmd 'gpush      ' '# push' 'git push'
 

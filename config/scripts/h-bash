@@ -1,0 +1,20 @@
+#!/bin/sh
+
+help=''
+
+if [ "$(tput colors)" -ge 8 ]; then
+  reset='\e[0m'
+  green='\e[1;32m'
+  blue='\e[1;34m'
+fi
+
+header() { help="$help\n$blue$1$reset\n"; }
+shortcut() { help="$help$1$green $2$reset\n"; }
+
+header "Goto"
+shortcut "ctrl + e" "End of command line"
+
+header "Clear"
+shortcut "ctrl + u" "Before cursor"
+
+printf "$help\n" | less -r

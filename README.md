@@ -19,6 +19,10 @@ c-nvim
 c-git
 c-kitty
 
+Show help
+h-git
+h-bash
+
 Configure LSP
 c-rust
 
@@ -34,7 +38,7 @@ gp         # pull, push
 gs         # status
 gb         # branch
 gd         # diff
-glog       # log
+gl         # log
 gpull      # pull
 gpush      # push
 
@@ -47,7 +51,6 @@ rc         # cd otcova-setup, nvim ~/.otcova-setup/config/rc.bash
 brc        # nvim ~/.bashrc
 
 Directories
-h          # ~
 d          # ~/Desktop/
 sp         # Stack push/pop directory
 
