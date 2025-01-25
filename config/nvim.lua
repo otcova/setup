@@ -1,7 +1,41 @@
-if vim.loop.os_uname().sysname:find("Windows") then
+if vim.uv.os_uname().sysname:find("Windows") then
   vim.opt.shell = "powershell"
   vim.opt.shellcmdflag = "-command"
 end
+
+-- Detect indent
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function()
+    local buf = vim.api.nvim_get_current_buf()
+
+    local indent2_score = 0
+    local indent4_score = 0
+
+    for i = 0, 200 do
+      local line = vim.api.nvim_buf_get_lines(buf, i, i + 1, false)[1]
+      if not line then
+        break
+      end
+
+      local indent = #line:match("^%s*")
+      if indent > 0 then
+        if indent % 4 == 0 then
+          indent4_score = indent4_score + 1
+        else
+          indent2_score = indent2_score + (indent % 2 == 0 and 2 or -1)
+          indent4_score = indent4_score - 1
+        end
+      end
+    end
+    if indent2_score > indent4_score then
+      vim.bo.shiftwidth = 2
+      vim.bo.tabstop = 2
+    elseif indent4_score > indent2_score then
+      vim.bo.shiftwidth = 4
+      vim.bo.tabstop = 4
+    end
+  end,
+})
 
 return {
   {
@@ -12,7 +46,7 @@ return {
           local max_file_size = 1024 * 1024 -- 1 MB
           local max_file_width = 10 * 1024 -- 10KB
 
-          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
           local file_size = 0
           if ok and stats then
             file_size = stats.size
@@ -170,6 +204,24 @@ return {
       { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
       { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
       { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    },
+  },
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    opts = {
+      render_modes = true,
+      anti_conceal = { enabled = false },
+      heading = {
+        width = "block",
+        min_width = 100,
+        border = true,
+        border_virtual = true,
+      },
+      code = {
+        language_name = false,
+        style = "normal",
+        min_width = 40,
+      },
     },
   },
 }
