@@ -38,7 +38,22 @@ fi
 
 if [ -e "$key_path" ]; then
   chmod 600 "$key_path"
-  git config --global core.sshCommand "ssh -i '${key_path}'"
+  git config --global core.sshCommand "ssh -o AddKeysToAgent=yes -i '${key_path}'"
 else
-  echo "${red}[ERROR]${reset} Ssh key '$key_path' not found"
+  echo "${red}[ERROR]${reset} ssh key '$key_path' not found"
+  exit
+fi
+
+if prompt-confirm 'Enable commits signing with ssh'; then
+  git config --global gpg.format ssh
+  git config --global commit.gpgsign true
+
+  signkey_path="${key_path}.pub"
+  signkey_path="$(prompt-path 'Enter the public signing key file' "$signkey_path")"
+  if [ -e "$key_path" ]; then
+    git config --global user.signingkey "$signkey_path"
+  else
+    echo "${red}[ERROR]${reset} ssh signing key '$signkey_path' not found"
+    exit
+  fi
 fi
