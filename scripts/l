@@ -1,0 +1,14 @@
+#!/bin/bash
+
+dir="${1:-.}/"
+
+printf "$blue"
+find "$dir" -mindepth 1 -maxdepth 1 -type d -not -path '*/.*' -printf "%f\n" | column -x
+find "$dir" -mindepth 1 -maxdepth 1 -type d -path '*/.*' -printf "%f\n" | column -x
+printf "$cyan"
+find "$dir" -maxdepth 1 -not -type d -executable -not -path '*/.*' -printf "%f\n" | column -x
+find "$dir" -maxdepth 1 -not -type d -executable -path '*/.*' -printf "%f\n" | column -x
+printf "$reset"
+find "$dir" -maxdepth 1 -not -type d -not -executable -not -path '*/.*' -printf "%f\n" | column -x
+find "$dir" -maxdepth 1 -not -type d -not -executable -path '*/.*' -printf "%f\n" | column -x
+printf "$reset"
