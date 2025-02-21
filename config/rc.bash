@@ -240,7 +240,12 @@ function otcova-uninstall() {
 if [ -n "$(command -v __git_ps1)" ]; then
   PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
 fi
-PS1='\n'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
+
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+  PS1='\n'$blue'\h'$reset':'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
+else
+  PS1='\n'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
+fi
 
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
