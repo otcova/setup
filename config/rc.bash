@@ -32,7 +32,7 @@ if [ "$(tput colors)" -ge 8 ]; then
 
   alias ls='ls --color=auto'
 fi
-unalias l
+unalias l 2>/dev/null
 
 #####################
 ####### Alias #######
