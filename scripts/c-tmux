@@ -2,3 +2,8 @@
 
 ask-link ~/.otcova-setup/config/tmux.conf ~/.tmux.conf
 git-install 'https://github.com/tmux-plugins/tpm' ~/.tmux/plugins/tpm
+
+if ! command -v tmux >/dev/null; then
+  mkdir -p ~/.otcova-setup/.bin
+  wget -qO ~/.otcova-setup/.bin/tmux https://github.com/tmux/tmux/releases/download/3.0a/tmux-3.0a-x86_64.AppImage
+fi
