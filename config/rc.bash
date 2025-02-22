@@ -4,8 +4,7 @@
 ######### Path #######
 ######################
 
-local base="$HOME/.otcova-setup"
-export PATH="$base/bin:$base/.bin:$PATH:$base/scripts"
+export PATH="$HOME/.otcova-setup/bin:$HOME/.otcova-setup/.bin:$PATH:$HOME/.otcova-setup/scripts"
 
 #######################################
 ####### Continue if Interactive #######
