@@ -4,7 +4,8 @@
 ######### Path #######
 ######################
 
-PATH="$HOME/.otcova-setup/bin:$HOME/.bin:$PATH:$HOME/.otcova-setup/scripts:$HOME/.otcova-setup/config/scripts"
+local base="$HOME/.otcova-setup"
+export PATH="$base/bin:$base/.bin:$PATH:$base/scripts"
 
 #######################################
 ####### Continue if Interactive #######
@@ -91,6 +92,7 @@ cmd 'brc        ' '# nvim ~/.bashrc' 'nvim $HOME/.bashrc'
 
 header 'Directories'
 cmd 'd          ' '# ~/Desktop/'
+cmd 'o          ' '# ~/.otcova-setup/' 'cd ~/.otcova-setup'
 cmd 'sp         ' '# Stack push/pop directory'
 
 header 'Tmux'

@@ -52,6 +52,7 @@ brc        # nvim ~/.bashrc
 
 Directories
 d          # ~/Desktop/
+o          # ~/.otcova-setup/
 sp         # Stack push/pop directory
 
 Tmux
