@@ -5,6 +5,6 @@ git-install 'https://github.com/tmux-plugins/tpm' ~/.tmux/plugins/tpm
 
 if ! command -v tmux >/dev/null; then
   mkdir -p ~/.otcova-setup/.bin
-  wget -qO ~/.otcova-setup/.bin/tmux https://github.com/tmux/tmux/releases/download/3.0a/tmux-3.0a-x86_64.AppImage
+  wget -qO ~/.otcova-setup/.bin/tmux https://github.com/kiyoon/tmux-appimage/releases/download/3.5a/tmux.appimage
   chmod +x ~/.otcova-setup/.bin/tmux
 fi

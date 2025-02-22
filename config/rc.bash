@@ -145,6 +145,8 @@ function tmux-main() {
   if [ -n "$(command -v tmux)" ]; then
     if [ -z "$TMUX" ]; then
       if ! tmux a -t main 2>/dev/null; then
+        # This solves: missing or unsuitable terminal: xterm-kitty
+        TERM='screen-256color'
         tmux new -s main \; new-window \; select-window -t 0 >/dev/null
       fi
     fi
@@ -311,3 +313,6 @@ fi
 if [ "$TERM" = "xterm-kitty" ]; then
   tmux-main
 fi
+
+# This solves: missing or unsuitable terminal: xterm-kitty
+export TERM='screen-256color'
