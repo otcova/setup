@@ -261,15 +261,17 @@ bind '"\C-s": clear-screen'
 ####### Start a ssh-agent #######
 #################################
 if ! ps "$SSH_AGENT_PID" >/dev/null 2>&1; then
-  # Try to load a currently running ssh-agent
-  SSH_AGENT_ENV="$HOME/.ssh/agent-environment"
-  . "$SSH_AGENT_ENV" >/dev/null 2>&1
-
-  if ! ps "$SSH_AGENT_PID" >/dev/null 2>&1; then
-    # Start a new ssh-agent
-    ssh-agent >"$SSH_AGENT_ENV"
-    chmod 600 "$SSH_AGENT_ENV"
+  if [ -d "$HOME/.ssh" ]; then
+    # Try to load a currently running ssh-agent
+    SSH_AGENT_ENV="$HOME/.ssh/agent-environment"
     . "$SSH_AGENT_ENV" >/dev/null 2>&1
+
+    if ! ps "$SSH_AGENT_PID" >/dev/null 2>&1; then
+      # Start a new ssh-agent
+      ssh-agent >"$SSH_AGENT_ENV"
+      chmod 600 "$SSH_AGENT_ENV"
+      . "$SSH_AGENT_ENV" >/dev/null 2>&1
+    fi
   fi
 fi
 
