@@ -307,6 +307,9 @@ return {
   },
   {
     "mrcjkb/rustaceanvim",
+    cond = function()
+      return vim.fn.executable("rust-analyzer") == 1
+    end,
     opts = {
       server = {
         default_settings = {

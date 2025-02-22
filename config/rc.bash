@@ -142,9 +142,11 @@ function sp() {
 }
 
 function tmux-main() {
-  if [ -z "$TMUX" ]; then
-    if ! tmux a -t main 2>/dev/null; then
-      tmux new -s main \; new-window \; select-window -t 0 >/dev/null
+  if [ -n "$(command -v tmux)" ]; then
+    if [ -z "$TMUX" ]; then
+      if ! tmux a -t main 2>/dev/null; then
+        tmux new -s main \; new-window \; select-window -t 0 >/dev/null
+      fi
     fi
   fi
 }

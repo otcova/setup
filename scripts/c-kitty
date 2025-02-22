@@ -4,5 +4,5 @@ ask-link ~/.otcova-setup/config/kitty ~/.config/kitty
 
 wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin dest=~/.otcova-setup/.local
 
-ask-link ~/.otcova-setup/.local/kitty.app/bin/kitty ~/.bin/kitty
-ask-link ~/.otcova-setup/.local/kitty.app/bin/kitten ~/.bin/kitten
+ask-link ~/.otcova-setup/.local/kitty.app/bin/kitty ~/.otcova-setup/.bin/kitty
+ask-link ~/.otcova-setup/.local/kitty.app/bin/kitten ~/.otcova-setup/.bin/kitten
