@@ -1,0 +1,9 @@
+#!/bin/bash
+
+curl -s "https://get.sdkman.io" | bash
+
+echo "> sdk list java"
+echo "> sdk install java 21.0.6-tem"
+echo "-----------------------------"
+echo "> sdk list gradle"
+echo "> sdk install gradle 8.13"
