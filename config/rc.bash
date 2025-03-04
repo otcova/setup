@@ -285,8 +285,13 @@ if [ -n "$(command -v complete)" ]; then
     "_$1" "$@"
   }
 
-  for command in fd rg bat yazi d; do
+  for command in fd rg bat yazi; do
     complete -F _lazy_autocomplete -o bashdefault -o default $command
+  done
+
+  # No Space
+  for command in d; do
+    complete -F _lazy_autocomplete -o bashdefault -o default -o nospace $command
   done
 fi
 
@@ -303,7 +308,7 @@ if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   ln -s /mnt/wslg/runtime-dir/wayland-0 "/run/user/$UID" 2>/dev/null
   ln -s /mnt/wslg/runtime-dir/wayland-0.lock "/run/user/$UID" 2>/dev/null
 
-  DESKTOP="/mnt/c/Users/$(cmd.exe /c "<nul set /p=%UserName%" 2>/dev/null)/Desktop"
+  DESKTOP="/mnt/c/Users/$(/mnt/c/WINDOWS/system32/cmd.exe /c "<nul set /p=%UserName%" 2>/dev/null)/Desktop"
 else
   DESKTOP="$(xdg-user-dir DESKTOP 2>/dev/null)" || DESKTOP="$HOME/Desktop"
 fi
