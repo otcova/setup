@@ -2,13 +2,17 @@
 
 dir="${1:-.}/"
 
-printf "$blue"
-find -L "$dir" -mindepth 1 -maxdepth 1 -type d -not -path '*/.*' -printf "%f\n" | column -x
-find -L "$dir" -mindepth 1 -maxdepth 1 -type d -path '*/.*' -printf "%f\n" | column -x
-printf "$cyan"
-find -L "$dir" -maxdepth 1 -not -type d -executable -not -path '*/.*' -printf "%f\n" | column -x
-find -L "$dir" -maxdepth 1 -not -type d -executable -path '*/.*' -printf "%f\n" | column -x
-printf "$reset"
-find -L "$dir" -maxdepth 1 -not -type d -not -executable -not -path '*/.*' -printf "%f\n" | column -x
-find -L "$dir" -maxdepth 1 -not -type d -not -executable -path '*/.*' -printf "%f\n" | column -x
-printf "$reset"
+if [ -e "$dir" ]; then
+  printf "$blue"
+  find -L "$dir" -mindepth 1 -maxdepth 1 -type d -not -path '*/.*' -printf "%f\n" | column -x
+  find -L "$dir" -mindepth 1 -maxdepth 1 -type d -path '*/.*' -printf "%f\n" | column -x
+  printf "$cyan"
+  find -L "$dir" -maxdepth 1 -not -type d -executable -not -path '*/.*' -printf "%f\n" | column -x
+  find -L "$dir" -maxdepth 1 -not -type d -executable -path '*/.*' -printf "%f\n" | column -x
+  printf "$reset"
+  find -L "$dir" -maxdepth 1 -not -type d -not -executable -not -path '*/.*' -printf "%f\n" | column -x
+  find -L "$dir" -maxdepth 1 -not -type d -not -executable -path '*/.*' -printf "%f\n" | column -x
+  printf "$reset"
+else
+  echo "'${dir}' No such file or directory"
+fi
