@@ -10,7 +10,10 @@ rm /usr/bin/perf
 ln -s /usr/lib/linux-tools/*-generic/perf /usr/bin/perf
 ```
 
-# Markdown to pdf
+# Markdown utils
+## Display like github
+
+## Convert to PDF
 ```bash
 sudo apt install pandoc texlive-latex-base texlive-latex-extra
 pandoc README.md -o readme.pdf"
