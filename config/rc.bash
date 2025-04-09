@@ -38,6 +38,27 @@ unalias l 2>/dev/null
 ####### Alias #######
 #####################
 
+. "$HOME/.otcova-setup/config/complete_alias"
+
+function alias() {
+  if builtin alias "$@"; then
+    aliasName="${1/=*/}"
+    [ -n "$aliasName" ] && complete -F _complete_alias "$aliasName"
+  else
+    return "$?"
+  fi
+}
+
+function unalias() {
+  if builtin unalias "$@"; then
+    complete -r "$1"
+  fi
+}
+
+#####################
+####### Help ########
+#####################
+
 OTCOVA_HELP=''
 function header() {
   [ -n "$OTCOVA_HELP" ] && OTCOVA_HELP+=$'\n'
