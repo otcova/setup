@@ -1,18 +1,36 @@
 #!/bin/bash
 
-dir="${1:-.}/"
+_show_dir() {
+  if [ -e "$1/" ]; then
+    printf "$blue"
+    find -L "$1/" -mindepth 1 -maxdepth 1 -type d -not -path '*/.*' -printf "%f\n" | column -x
+    find -L "$1/" -mindepth 1 -maxdepth 1 -type d -path '*/.*' -printf "%f\n" | column -x
+    printf "$cyan"
+    find -L "$1/" -maxdepth 1 -not -type d -executable -not -path '*/.*' -printf "%f\n" | column -x
+    find -L "$1/" -maxdepth 1 -not -type d -executable -path '*/.*' -printf "%f\n" | column -x
+    printf "$reset"
+    find -L "$1/" -maxdepth 1 -not -type d -not -executable -not -path '*/.*' -printf "%f\n" | column -x
+    find -L "$1/" -maxdepth 1 -not -type d -not -executable -path '*/.*' -printf "%f\n" | column -x
+    printf "$reset"
+  else
+    echo "'${dir}' No such file or directory"
+  fi
+}
 
-if [ -e "$dir" ]; then
-  printf "$blue"
-  find -L "$dir" -mindepth 1 -maxdepth 1 -type d -not -path '*/.*' -printf "%f\n" | column -x
-  find -L "$dir" -mindepth 1 -maxdepth 1 -type d -path '*/.*' -printf "%f\n" | column -x
-  printf "$cyan"
-  find -L "$dir" -maxdepth 1 -not -type d -executable -not -path '*/.*' -printf "%f\n" | column -x
-  find -L "$dir" -maxdepth 1 -not -type d -executable -path '*/.*' -printf "%f\n" | column -x
-  printf "$reset"
-  find -L "$dir" -maxdepth 1 -not -type d -not -executable -not -path '*/.*' -printf "%f\n" | column -x
-  find -L "$dir" -maxdepth 1 -not -type d -not -executable -path '*/.*' -printf "%f\n" | column -x
-  printf "$reset"
-else
-  echo "'${dir}' No such file or directory"
-fi
+[ $# -le 0 ] && _show_dir .
+
+for arg in "$@"; do
+  if [ ! -f "$arg" ]; then
+    [ $# -ge 2 ] && echo $'\n'"[$arg]:"
+    _show_dir "$arg"
+  fi
+done
+
+for arg in "$@"; do
+  if [ -f "$arg" ]; then
+    if ! bat "$arg" 2>/dev/null; then
+      [ $# -ge 2 ] && echo $'\n'"[$arg]:"
+      cat "$arg"
+    fi
+  fi
+done

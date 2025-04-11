@@ -92,9 +92,10 @@ cmd 'fs  <regex> ' '# File search' 'rg --files | rg'
 cmd 'pss <regex> ' '# Process search' 'ps -A | rg'
 
 header 'Git Aliases'
-cmd 'ga <msg>   ' '# add all, commit' 'git add -A && git commit --message'
-cmd 'gc <msg>   ' '# commit' 'git commit --message'
-cmd 'gp         ' '# pull, push' 'git pull --ff-only && git push'
+cmd 'gap <msg>  ' '# add all, commit, push'
+cmd 'ga  <msg>  ' '# add all, commit' 'git add -A && git commit --message'
+cmd 'gc  <msg>  ' '# commit' 'git commit --message'
+cmd 'gp         ' '# pull & push' 'git pull --ff-only && git push'
 cmd 'gs         ' '# status' 'git status && git pull --ff-only'
 cmd 'gb         ' '# branch' 'git branch'
 cmd 'gd         ' '# diff' 'git diff'
@@ -152,6 +153,10 @@ function v() {
 function d() {
   cd "$DESKTOP"
   [ -n "$1" ] && cd "$1"
+}
+
+function gap() {
+  git add -A && git commit --message "$1" && git push
 }
 
 function sp() {
