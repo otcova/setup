@@ -32,9 +32,10 @@ fs  <regex> # File search
 pss <regex> # Process search
 
 Git Aliases
-ga <msg>   # add all, commit
-gc <msg>   # commit
-gp         # pull, push
+gap <msg>  # add all, commit, push
+ga  <msg>  # add all, commit
+gc  <msg>  # commit
+gp         # pull & push
 gs         # status
 gb         # branch
 gd         # diff
