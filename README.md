@@ -55,6 +55,8 @@ Directories
 d          # ~/Desktop/
 o          # ~/.otcova-setup/
 sp         # Stack push/pop directory
+l          # Custom ls
+y          # Terminal file explorer (yazi)
 
 Tmux
 tmux-main  # Main tmux session

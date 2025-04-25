@@ -115,6 +115,8 @@ header 'Directories'
 cmd 'd          ' '# ~/Desktop/'
 cmd 'o          ' '# ~/.otcova-setup/' 'cd ~/.otcova-setup'
 cmd 'sp         ' '# Stack push/pop directory'
+cmd 'l          ' '# Custom ls'
+cmd 'y          ' '# Terminal file explorer (yazi)' 'yazi'
 
 header 'Tmux'
 cmd 'tmux-main  ' '# Main tmux session'
