@@ -35,12 +35,30 @@ fi
 unalias l 2>/dev/null
 
 #####################
+####### Fixes #######
+#####################
+
+# Fix Ctrl-S Freeze
+stty -ixon
+
+# WSL Fixes
+if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+  # Fix Wayland
+  ln -s /mnt/wslg/runtime-dir/wayland-0 "/run/user/$UID" 2>/dev/null
+  ln -s /mnt/wslg/runtime-dir/wayland-0.lock "/run/user/$UID" 2>/dev/null
+
+  DESKTOP="/mnt/c/Users/$(/mnt/c/WINDOWS/system32/cmd.exe /c "<nul set /p=%UserName%" 2>/dev/null)/Desktop"
+else
+  DESKTOP="$(xdg-user-dir DESKTOP 2>/dev/null)" || DESKTOP="$HOME/Desktop"
+fi
+
+#####################
 ####### Alias #######
 #####################
 
 . "$HOME/.otcova-setup/config/complete_alias"
 
-function alias() {
+alias() {
   if builtin alias "$@"; then
     aliasName="${1/=*/}"
     [ -n "$aliasName" ] && complete -F _complete_alias "$aliasName"
@@ -49,22 +67,72 @@ function alias() {
   fi
 }
 
-function unalias() {
+unalias() {
   if builtin unalias "$@"; then
     complete -r "$1"
   fi
 }
+
+########################
+####### cd Alias #######
+########################
+
+# Concats the multiple arguments with slashes
+c() {
+  cd "$(
+    IFS=/
+    echo "$*"
+  )"
+}
+
+_c() {
+  # Slice of COMP_WORDS that excludes the first (the command name) and last element (the incomplete word)
+  local base_dir=("${COMP_WORDS[@]:1:${#COMP_WORDS[@]}-2}")
+  base_dir="$(
+    IFS=/
+    echo "${base_dir[*]}"
+  )"
+
+  local last_word="${COMP_WORDS[COMP_CWORD]}"
+
+  local IFS=$'\n'
+  COMPREPLY=($(
+    pushd "${base_dir:-.}" &>/dev/null && {
+      compgen -dS/ -- "$last_word"
+      popd &>/dev/null
+    }
+  ))
+
+  ###### Handle Directories with Spaces ######
+
+  # Step 1: Find common prefix
+  local prefix="${COMPREPLY[0]}"
+  for str in "${COMPREPLY[@]}"; do
+    while [[ "$str" != "$prefix"* ]]; do
+      prefix="${prefix%?}" # Remove one character at a time
+    done
+  done
+
+  # Step 2: If prefix has spaces, surround it with quotes inside each element
+  if [[ "$prefix" == *" "* ]]; then
+    for i in "${!COMPREPLY[@]}"; do
+      COMPREPLY[$i]="\"$prefix\"${COMPREPLY[$i]#"$prefix"}"
+    done
+  fi
+}
+
+complete -F _c -o nospace c
 
 #####################
 ####### Help ########
 #####################
 
 OTCOVA_HELP=''
-function header() {
+header() {
   [ -n "$OTCOVA_HELP" ] && OTCOVA_HELP+=$'\n'
   OTCOVA_HELP+=$blue"$1"$reset$'\n'
 }
-function cmd() {
+cmd() {
   OTCOVA_HELP+="$1"$green"$2"$reset$'\n'
   if [ -n "$3" ]; then
     aliasName=($1)
@@ -112,8 +180,8 @@ cmd 'rc         ' '# cd otcova-setup, nvim ~/.otcova-setup/config/rc.bash' 'sp "
 cmd 'brc        ' '# nvim ~/.bashrc' 'nvim $HOME/.bashrc'
 
 header 'Directories'
-cmd 'd          ' '# ~/Desktop/'
-cmd 'o          ' '# ~/.otcova-setup/' 'cd ~/.otcova-setup'
+cmd 'd          ' '# ~/Desktop/' "c $DESKTOP"
+cmd 'o          ' '# ~/.otcova-setup/' 'c ~/.otcova-setup'
 cmd 'sp         ' '# Stack push/pop directory'
 cmd 'l          ' '# Custom ls'
 cmd 'y          ' '# Terminal file explorer (yazi)' 'yazi'
@@ -143,7 +211,7 @@ unset header cmd
 ####### Functions #######
 #########################
 
-function v() {
+v() {
   if [ -f "$1" ]; then
     nvim "$1"
   else
@@ -152,16 +220,11 @@ function v() {
   fi
 }
 
-function d() {
-  cd "$DESKTOP"
-  [ -n "$1" ] && cd "$1"
-}
-
-function gap() {
+gap() {
   git add -A && git commit --message "$1" && git push
 }
 
-function sp() {
+sp() {
   if [ -z "$1" ]; then
     popd >/dev/null
   elif [ ! "$PWD" -ef "$1" ]; then
@@ -169,7 +232,7 @@ function sp() {
   fi
 }
 
-function tmux-main() {
+tmux-main() {
   if [ -n "$(command -v tmux)" ]; then
     if [ -z "$TMUX" ]; then
       # This solves: missing or unsuitable terminal: xterm-kitty
@@ -185,7 +248,7 @@ function tmux-main() {
 ####### Configurations #######
 ##############################
 
-function _otcova-add-rc-hook() {
+_otcova-add-rc-hook() {
   config_line='. ~/.otcova-setup/config/rc.bash'
   rc_hook_comment='# Source the otcova setup rc here'
 
@@ -214,7 +277,7 @@ function _otcova-add-rc-hook() {
   fi
 }
 
-function _otcova-remove-rc-hook() {
+_otcova-remove-rc-hook() {
   config_line='. ~/.otcova-setup/config/rc.bash'
   rc_hook_comment='# Source the otcova setup rc here'
 
@@ -226,7 +289,7 @@ function _otcova-remove-rc-hook() {
   done
 }
 
-function otcova() {
+otcova() {
   . ${HOME}/.otcova-setup/config/rc.bash
 
   # update README.md with new possibly new $OTCOVA_HELP
@@ -240,7 +303,7 @@ function otcova() {
   echo "$OTCOVA_HELP" | less -r
 }
 
-function otcova-update() {
+otcova-update() {
   git -C ~/.otcova-setup pull
 
   _otcova-remove-rc-hook
@@ -248,12 +311,12 @@ function otcova-update() {
   _otcova-add-rc-hook
 }
 
-function otcova-install() {
+otcova-install() {
   _otcova-add-rc-hook
   c-all
 }
 
-function otcova-uninstall() {
+otcova-uninstall() {
   rm -rf ~/.otcova-setup
 
   config_line='. ~/.otcova-setup/config/rc.bash'
@@ -308,7 +371,7 @@ fi
 #################################
 
 if [ -n "$(command -v complete)" ]; then
-  function _lazy_autocomplete() {
+  _lazy_autocomplete() {
     . ~/.otcova-setup/autocomplete/"$1".bash
     "_$1" "$@"
   }
@@ -316,29 +379,6 @@ if [ -n "$(command -v complete)" ]; then
   for command in fd rg bat yazi; do
     complete -F _lazy_autocomplete -o bashdefault -o default $command
   done
-
-  # No Space
-  for command in d; do
-    complete -F _lazy_autocomplete -o bashdefault -o default -o nospace $command
-  done
-fi
-
-#####################
-####### Fixes #######
-#####################
-
-# Fix Ctrl-S Freeze
-stty -ixon
-
-# WSL Fixes
-if [ -e /proc/sys/fs/binfmt_misc/WSLInterop ]; then
-  # Fix Wayland
-  ln -s /mnt/wslg/runtime-dir/wayland-0 "/run/user/$UID" 2>/dev/null
-  ln -s /mnt/wslg/runtime-dir/wayland-0.lock "/run/user/$UID" 2>/dev/null
-
-  DESKTOP="/mnt/c/Users/$(/mnt/c/WINDOWS/system32/cmd.exe /c "<nul set /p=%UserName%" 2>/dev/null)/Desktop"
-else
-  DESKTOP="$(xdg-user-dir DESKTOP 2>/dev/null)" || DESKTOP="$HOME/Desktop"
 fi
 
 ######################################
