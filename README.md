@@ -54,6 +54,7 @@ brc        # nvim ~/.bashrc
 Directories
 d          # ~/Desktop/
 o          # ~/.otcova-setup/
+..         # cd ..
 sp         # Stack push/pop directory
 l          # Custom ls
 y          # Terminal file explorer (yazi)

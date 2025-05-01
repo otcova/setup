@@ -182,6 +182,7 @@ cmd 'brc        ' '# nvim ~/.bashrc' 'nvim $HOME/.bashrc'
 header 'Directories'
 cmd 'd          ' '# ~/Desktop/' "c $DESKTOP"
 cmd 'o          ' '# ~/.otcova-setup/' 'c ~/.otcova-setup'
+cmd '..         ' '# cd ..' 'c ..'
 cmd 'sp         ' '# Stack push/pop directory'
 cmd 'l          ' '# Custom ls'
 cmd 'y          ' '# Terminal file explorer (yazi)' 'yazi'
