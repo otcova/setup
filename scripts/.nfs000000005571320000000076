@@ -12,8 +12,7 @@ header() { help="$help\n$blue$1$reset\n"; }
 shortcut() { help="$help$1$green $2$reset\n"; }
 
 header "Revert"
-shortcut "git revert <commit>  " "Create a new commit reverting <commit>"
-shortcut "git reset HEAD~1     " "Deletes most recent commit"
+shortcut "git reset HEAD~1  " "Most recent commit"
 
 header "Change"
 shortcut "git commit --amend --reset-author --no-edit" "Most recent commit author"
