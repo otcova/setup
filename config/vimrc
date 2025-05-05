@@ -19,6 +19,12 @@ set softtabstop=2
 set expandtab
 set noshiftround
 
+" Window movement
+nnoremap <silent> <C-h> <C-w>h
+nnoremap <silent> <C-j> <C-w>j
+nnoremap <silent> <C-k> <C-w>k
+nnoremap <silent> <C-l> <C-w>l
+
 " Search highlight
 set hlsearch incsearch
 nohlsearch
