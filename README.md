@@ -33,13 +33,16 @@ pss <regex> # Process search
 
 Git Aliases
 gap <msg>  # add all, commit, push
-ga  <msg>  # add all, commit
+gac <msg>  # add all, commit
 gc  <msg>  # commit
-gp         # pull & push
+ga         # add
+gp         # pull, push
 gs         # status
 gb         # branch
 gd         # diff
 gl         # log
+gw         # switch
+gk         # checkout
 gpull      # pull
 gpush      # push
 
