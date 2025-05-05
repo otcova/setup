@@ -16,7 +16,7 @@ shortcut "git revert <commit>  " "Create a new commit reverting <commit>"
 shortcut "git reset HEAD~1     " "Deletes most recent commit"
 
 header "Change"
-shortcut "git commit --amend --reset-author --no-edit" "Most recent commit author"
-shortcut "git commit --amend --message '<msg>'       " "Most recent commit message"
+shortcut "git commit --amend --reset-author --no-edit" "Change most recent commit author"
+shortcut "git commit --amend --message '<msg>'       " "Change most recent commit message"
 
 printf "$help\n" | less -r

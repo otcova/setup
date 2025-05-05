@@ -12,9 +12,10 @@ header() { help="$help\n$blue$1$reset\n"; }
 shortcut() { help="$help$1$green $2$reset\n"; }
 
 header "Goto"
-shortcut "ctrl + e" "End of command line"
+shortcut "ctrl + e" "Goto end of command line"
 
 header "Clear"
-shortcut "ctrl + u" "Before cursor"
+shortcut "alt + backspace" "Delete word"
+shortcut "ctrl + u       " "Delete right of cursor"
 
 printf "$help\n" | less -r
