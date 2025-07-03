@@ -1,10 +1,8 @@
+-- Use powershell in windows
 if vim.uv.os_uname().sysname:find("Windows") then
   vim.opt.shell = "powershell"
   vim.opt.shellcmdflag = "-command"
 end
-
--- Color unused code
-vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { link = "DiagnosticUnnecessary" })
 
 -- Detect indent
 vim.api.nvim_create_autocmd("FileType", {
@@ -30,156 +28,117 @@ vim.api.nvim_create_autocmd("FileType", {
         end
       end
     end
-    if indent2_score > indent4_score then
+
+    local threshold = 2
+    if indent2_score - indent4_score >= threshold then
       vim.bo.shiftwidth = 2
       vim.bo.tabstop = 2
-    elseif indent4_score > indent2_score then
+    elseif indent4_score - indent2_score >= threshold then
       vim.bo.shiftwidth = 4
       vim.bo.tabstop = 4
     end
   end,
 })
 
-----------------------------------------
-----------------------------------------
+-------------------------------------------
+---------- Center Content -----------------
+-------------------------------------------
 
-local function create_invisible_split()
-  local blank_buffer = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_set_option_value("modifiable", false, { buf = blank_buffer })
+local padding_win = nil
+local padding_config = {
+  -- Number of columns that the content should have centered after adding the padding.
+  content_size = 100,
+  -- Sizes will be multiple of 10, (This makes it easyer for things to align)
+  round_scale = 10,
+  blank_buffer = vim.api.nvim_create_buf(false, true),
+}
 
-  local win = vim.api.nvim_open_win(blank_buffer, false, { split = "left" })
+vim.api.nvim_set_option_value("modifiable", false, { buf = padding_config.blank_buffer })
 
-  local opts = { win = win }
-  vim.api.nvim_set_option_value("number", false, opts)
-  vim.api.nvim_set_option_value("relativenumber", false, opts)
-  vim.api.nvim_set_option_value("signcolumn", "no", opts)
-  vim.api.nvim_set_option_value("cursorline", false, opts)
+local function create_padding_win()
+  if padding_win == nil then
+    padding_win = vim.api.nvim_open_win(padding_config.blank_buffer, false, { split = "left" })
 
-  return win
-end
-
-local left_win = nil
-local right_win = nil
-
--- Returns the win_id after the possible creation / deletion
--- `position` must be H (left-most) or L (right-most)
-local function set_pad_window(win, width, position)
-  if win ~= nil and not vim.api.nvim_win_is_valid(win) then
-    win = nil
+    local opts = { win = padding_win }
+    vim.api.nvim_set_option_value("number", false, opts)
+    vim.api.nvim_set_option_value("relativenumber", false, opts)
+    vim.api.nvim_set_option_value("signcolumn", "no", opts)
+    vim.api.nvim_set_option_value("cursorline", false, opts)
   end
 
-  if width <= 0 then
-    if win ~= nil then
-      vim.api.nvim_win_close(win, false)
+  -- position
+  vim.api.nvim_win_call(padding_win, function()
+    vim.api.nvim_command("wincmd H")
+  end)
+
+  -- size
+  local pad_width = vim.o.columns - padding_config.content_size
+  local left_pad = pad_width / 2
+  left_pad = math.floor(0.5 + left_pad / padding_config.round_scale) * padding_config.round_scale
+  vim.api.nvim_win_set_width(padding_win, left_pad)
+end
+
+local function delete_padding_win()
+  if padding_win ~= nil then
+    vim.api.nvim_win_close(padding_win, false)
+    padding_win = nil
+  end
+end
+
+-- -- Redirect focus
+-- vim.api.nvim_create_autocmd("WinEnter", {
+--   callback = function()
+--     if vim.api.nvim_get_current_win() == padding_win then
+--       vim.api.nvim_command("wincmd l")
+--       if vim.api.nvim_get_current_win() == padding_win then
+--         padding_win = nil
+--       end
+--     end
+--   end,
+-- })
+
+-- Add padding automatically
+vim.api.nvim_create_autocmd({ "WinNew", "WinClosed", "VimResized", "WinResized", "BufReadPost", "BufNewFile" }, {
+  callback = function(event)
+    local event_win = tonumber(event.match)
+
+    if event_win and (vim.api.nvim_win_get_config(event_win).relative or "") ~= "" then
+      return
     end
-    return nil
-  end
 
-  if win == nil then
-    win = create_invisible_split()
+    if padding_win and vim.api.nvim_win_get_buf(padding_win) ~= padding_config.blank_buffer then
+      padding_win = nil
+    end
 
-    vim.api.nvim_win_call(win, function()
-      vim.api.nvim_command("wincmd " .. position)
-    end)
-  end
+    if event_win == padding_win and event.event == "WinClosed" then
+      padding_win = nil
+    end
 
-  vim.api.nvim_win_set_width(win, width)
-  return win
-end
+    local content_window = nil
 
-local function is_floating(win_id)
-  local config = vim.api.nvim_win_get_config(win_id)
-  return not config.relative or config.relative ~= ""
-end
-
-local function set_padding(content_window)
-  local window_width = 110
-  local pad_width = vim.o.columns - window_width
-  local left_pad = math.floor(pad_width / 2)
-  local right_pad = math.ceil(pad_width / 2)
-
-  left_win = set_pad_window(left_win, left_pad, "H")
-  right_win = set_pad_window(right_win, right_pad, "L")
-
-  -- In case of window creation, the sizes migth have been changed
-  left_win = set_pad_window(left_win, left_pad, "H")
-  vim.api.nvim_win_set_width(content_window, window_width)
-  right_win = set_pad_window(right_win, right_pad, "L")
-end
-
-local function remove_padding()
-  left_win = set_pad_window(left_win, 0, "H")
-  right_win = set_pad_window(right_win, 0, "L")
-end
-
-local function pad_windows()
-  local windows = vim.api.nvim_tabpage_list_wins(0) -- Get all windows in the current tabpage
-
-  local content_window = nil
-  local content_window_col = nil
-
-  for _, window in ipairs(windows) do
-    if window ~= left_win and window ~= right_win and not is_floating(window) then
-      if content_window == nil or content_window_col == nil then
-        content_window = window
-        content_window_col = vim.api.nvim_win_get_position(window)[2]
-      elseif content_window_col == vim.api.nvim_win_get_position(window)[2] then
-      -- This means that the window is a horizontal split of content_window.
-      -- We will ignore it.
-      else
-        remove_padding()
-        return
+    for _, window in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      if window ~= padding_win then
+        if (vim.api.nvim_win_get_config(window).relative or "") == "" then
+          if content_window then
+            delete_padding_win()
+            return
+          end
+          content_window = window
+        end
       end
     end
-  end
 
-  if content_window == nil then
-    local buffer = vim.api.nvim_create_buf(false, true)
-    content_window = vim.api.nvim_open_win(buffer, true, { split = "right" })
-    local opts = { win = content_window }
-    vim.api.nvim_set_option_value("number", true, opts)
-    vim.api.nvim_set_option_value("relativenumber", true, opts)
-    vim.api.nvim_set_option_value("signcolumn", "yes", opts)
-    vim.api.nvim_set_option_value("cursorline", true, opts)
-  end
-
-  set_padding(content_window)
-end
-
--- Returns the win_id after the possible deletion
--- where must be h (left) or l (right)
-local function redirect_focus(win, where)
-  if vim.api.nvim_get_current_win() ~= win then
-    return win
-  end
-
-  vim.cmd("wincmd " .. where)
-
-  if vim.api.nvim_get_current_win() ~= win then
-    return win
-  end
-
-  vim.api.nvim_win_close(win, false)
-  return nil
-end
-
--- Redirect focus
-vim.api.nvim_create_autocmd("WinEnter", {
-  callback = function()
-    left_win = redirect_focus(left_win, "l")
-    right_win = redirect_focus(right_win, "h")
-  end,
-})
-
-vim.api.nvim_create_autocmd({ "WinNew", "WinClosed", "VimResized", "WinResized" }, {
-  callback = function()
-    if vim.api.nvim_win_get_config(0).relative == "" then
-      pad_windows()
+    if content_window then
+      create_padding_win()
+      vim.api.nvim_set_current_win(content_window)
     end
   end,
 })
 
-pad_windows()
+-- create_padding_win()
+
+-------------------------------------------
+-------------------------------------------
 
 return {
   { "akinsho/bufferline.nvim", enabled = false },
@@ -227,15 +186,6 @@ return {
   },
   {
     "nvim-neo-tree/neo-tree.nvim",
-    keys = {
-      {
-        "<leader>fe",
-        function()
-          require("neo-tree.command").execute({ reveal = true, toggle = true, dir = LazyVim.root() })
-        end,
-        desc = "Explorer NeoTree (Root Dir)",
-      },
-    },
     opts = {
       use_default_mappings = false,
       filesystem = {
@@ -243,7 +193,7 @@ return {
       },
       window = {
         auto_expand_width = true,
-        position = "float",
+        position = "left",
         mappings = {
           ["s"] = "toggle_hidden", -- show hidden
           ["?"] = "show_help",
