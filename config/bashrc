@@ -1,0 +1,386 @@
+#!/bin/bash
+
+otcova_path="$(dirname -- "$(dirname -- "$(realpath -- "${BASH_SOURCE-$0}")")")"
+
+v() {
+    if command -v nvim >/dev/null; then
+        nvim "$@"
+    else
+        vim "$@"
+    fi
+}
+
+gap() {
+    git add -A && git commit --message "$1" && git push
+}
+
+. "$otcova_path/config/complete_alias"
+alias() {
+    if builtin alias "$@"; then
+        aliasName="${1/=*/}"
+        [ -n "$aliasName" ] && complete -F _complete_alias "$aliasName"
+    else
+        return "$?"
+    fi
+}
+
+unalias() {
+    if builtin unalias "$@"; then
+        complete -r "$1"
+    fi
+}
+
+c() {
+    cd "$(IFS=/;echo "${*-$HOME}")"
+}
+
+_c() {
+    # Slice of COMP_WORDS that excludes the first (the command name) and last element (the incomplete word)
+    local base_dir=("${COMP_WORDS[@]:1:${#COMP_WORDS[@]}-2}")
+    base_dir="$(IFS=/;echo "${base_dir[*]}")"
+
+    local last_word="${COMP_WORDS[COMP_CWORD]}"
+
+    local IFS=$'\n'
+    COMPREPLY=($(
+        pushd "${base_dir:-.}" &>/dev/null && {
+            compgen -dS/ -- "$last_word"
+            popd &>/dev/null
+        }
+    ))
+
+    ###### Handle Directories with Spaces ######
+
+    # Step 1: Find common prefix
+    local prefix="${COMPREPLY[0]}"
+    for str in "${COMPREPLY[@]}"; do
+        while [[ "$str" != "$prefix"* ]]; do
+            prefix="${prefix%?}" # Remove one character at a time
+        done
+    done
+
+    # Step 2: If prefix has spaces, surround it with quotes inside each element
+    if [[ "$prefix" == *" "* ]]; then
+        for i in "${!COMPREPLY[@]}"; do
+            COMPREPLY[$i]="\"$prefix\"${COMPREPLY[$i]#"$prefix"}"
+        done
+    fi
+}
+
+complete -F _c -o nospace c
+
+i-git() {
+    app_path="$otcova_path/.apps/git"
+    mkdir -p "$app_path"
+    mkdir -p ~/.ssh
+    touch "$app_path/.gitconfig"
+
+    i-otcova
+
+    if ! command -v delta >/dev/null; then
+        i-delta
+    fi
+
+    git config --global core.pager delta
+    git config --global interactive.diffFilter 'delta --color-only'
+    git config --global delta.navigate true
+    git config --global delta.side-by-side true
+
+    git config --global merge.conflictStyle zdiff3
+    git config --global init.defaultBranch main
+
+    if command -v nvim >/dev/null; then
+        git config --global core.editor nvim
+    else
+        git config --global core.editor vim
+    fi
+
+    printf "Git user.name ($(git config --global user.name)): "
+    read new_user_name
+    if [ ! -z "$new_user_name" ]; then git config --global user.name "$new_user_name"; fi
+
+    printf "Git user.email ($(git config --global user.email)): "
+    read new_user_email
+    if [ ! -z "$new_user_email" ]; then git config --global user.email "$new_user_email"; fi
+
+    # SSH Keys
+    local current_ssh="$(git config --global core.sshCommand)"
+    if [ ! -z "$current_ssh" ]; then
+        printf "Keep current ssh '$current_ssh' (yes): "
+        read keep_current
+        if [ -z "$keep_current" ] || [ "$keep_current" != "${keep_current#[Yy]}" ]; then
+            exit;
+        fi
+    fi
+
+    local key_path=~/.ssh/id_ed25519
+    ssh-keygen -q -t ed25519 -C "$(git config --global user.email)" -f "$key_path"
+    chmod 600 "$key_path"
+    git config --global core.sshCommand "ssh -o AddKeysToAgent=yes -i '${key_path}'"
+
+    # Commits signing with ssh
+    git config --global gpg.format ssh
+    git config --global commit.gpgsign true
+    git config --global user.signingkey "${key_path}.pub"
+}
+
+i-rust() {
+    if command -v rustup >/dev/null; then
+        rustup component add rust-analyzer
+        rustup update
+    else
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    fi
+}
+
+i-java() {
+    curl -s "https://get.sdkman.io" | bash
+
+    echo "---------  EXAMPLES  ---------"
+    echo "> sdk list java"
+    echo "> sdk install java 21.0.6-tem"
+    echo "------------------------------"
+    echo "> sdk list gradle"
+    echo "> sdk install gradle 8.13"
+    echo "------------------------------"
+}
+
+i-kitty() {
+    wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin dest="$otcova_path/.apps"
+}
+
+i-tmux() {
+    # git clone
+    app_path="$otcova_path/.apps/tmux"
+    rm -rf "$app_path"
+    mkdir -p "$app_path/bin"
+    mkdir -p "$app_path/.tmux/plugins"
+
+    git clone 'https://github.com/tmux-plugins/tpm' "$app_path/.tmux/plugins/tpm"
+    wget -qO "$app_path/bin/tmux" 'https://github.com/nelsonenzo/tmux-appimage/releases/latest/download/tmux.appimage'
+    chmod +x "$app_path/bin/tmux"
+}
+
+i-delta() {
+    app_path="$otcova_path/.apps/delta"
+    rm -rf "$app_path"
+    wget -qO- 'https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2-x86_64-unknown-linux-musl.tar.gz' | tar xz -C "$otcova_path/.apps"
+    mv "$otcova_path"/.apps/delta-*-linux-musl "$app_path"
+
+    mkdir "$app_path/bin"
+    mv "$app_path/delta" "$app_path/bin"
+}
+
+i-rg() {
+    app_path="$otcova_path/.apps/rg"
+    rm -rf "$app_path"
+    wget -qO- 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz' | tar xz -C "$otcova_path/.apps"
+    mv "$otcova_path"/.apps/ripgrep-*-linux-musl "$app_path"
+
+    mkdir "$app_path/bin"
+    mv "$app_path/rg" "$app_path/bin"
+
+    mkdir -p "$app_path/man/man1"
+    mv "$app_path"/doc/*.1 "$app_path/man/man1"
+
+    mv "$app_path/complete" "$app_path/completions"
+
+    source-otcova
+}
+
+i-nvim() {
+    app_path="$otcova_path/.apps/nvim"
+    rm -rf "$app_path"
+    wget -qO- 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz' | tar xz -C "$otcova_path/.apps"
+    mv "$otcova_path/.apps/nvim-linux-x86_64" "$app_path"
+
+    if ! command -v rg >/dev/null; then
+    i-rg
+    fi
+
+    if ! command -v curl >/dev/null; then
+    echo "You may want to install curl"
+    fi
+
+    if ! command -v wl-copy >/dev/null && ! command -v xsel >/dev/null; then
+    echo "You may want to install wl-clipboard or xclip/xsel"
+    fi
+
+    if [ -e ~/.gitconfig ]; then
+    git config --global core.editor nvim
+    fi
+    i-otcova
+}
+
+i-bat() {
+    app_path="$otcova_path/.apps/bat"
+    rm -rf "$app_path"
+    wget -qO- 'https://github.com/sharkdp/bat/releases/download/v0.25.0/bat-v0.25.0-x86_64-unknown-linux-musl.tar.gz' | tar xz -C "$otcova_path/.apps"
+    mv "$otcova_path"/.apps/bat-*-linux-musl "$app_path"
+
+    mkdir "$app_path/bin"
+    mv "$app_path/bat" "$app_path/bin"
+    
+    mkdir -p "$app_path/man/man1"
+    mv "$app_path"/*.1 -t "$app_path/man/man1"
+
+    mv "$app_path/autocomplete" "$app_path/completions"
+}
+
+i-exa() {
+    app_path="$otcova_path/.apps/exa"
+    rm -rf "$app_path"
+    mkdir -p "$app_path"
+
+    zipped="$(mktemp -ut pipe.XXXXXXXXXXXXXXXX.zip)"
+    wget -qO "$zipped" 'https://github.com/ogham/exa/releases/download/v0.10.1/exa-linux-x86_64-musl-v0.10.1.zip'
+    unzip -qd "$app_path" "$zipped" 
+    rm "$zipped"
+
+    # Setup man folder
+    mkdir "$app_path/man/man1"
+    mkdir "$app_path/man/man5"
+    mv "$app_path"/man/*.1 -t "$app_path/man/man1"
+    mv "$app_path"/man/*.5 -t "$app_path/man/man5"
+
+    source-otcova
+}
+
+i-vim() {
+    mkdir -p "$otcova_path/.apps/.vim/colors/"
+    wget -qO "$otcova_path/.apps/.vim/colors/gruvbox.vim" 'https://raw.githubusercontent.com/morhetz/gruvbox/refs/heads/master/colors/gruvbox.vim'
+}
+
+i-otcova() {
+    mkdir -p ~/.local/share/fonts
+    ln -Tsf "$otcova_path/fonts" ~/.local/share/fonts/otcova
+
+    ln -Ts "$otcova_path/config/tmux.conf" ~/.tmux.conf 2>/dev/null
+    ln -Ts "$otcova_path/.apps/tmux/.tmux" ~/.tmux 2>/dev/null
+
+    ln -Ts "$otcova_path/config/vimrc" ~/.vimrc 2>/dev/null
+    ln -Ts "$otcova_path/.apps/.vim" ~/.vim 2>/dev/null
+
+    ln -Ts "$otcova_path/config/kitty" ~/.config/kitty 2>/dev/null
+
+    ln -Ts "$otcova_path/config/nvim" ~/.config/nvim 2>/dev/null
+
+    ln -Ts "$otcova_path/.apps/git/.gitconfig" ~/.gitconfig 2>/dev/null
+}
+
+source-otcova() {
+    export PATH="$PATH:$otcova_path/.apps/exa/bin"
+    export PATH="$PATH:$otcova_path/.apps/tmux/bin"
+    export PATH="$PATH:$otcova_path/.apps/kitty.app/bin"
+    export PATH="$PATH:$otcova_path/.apps/bat/bin"
+    export PATH="$PATH:$otcova_path/.apps/nvim/bin"
+    export PATH="$PATH:$otcova_path/.apps/delta/bin"
+    export PATH="$PATH:$otcova_path/.apps/rg/bin"
+
+    # If not running interactively, exit early
+    case $- in
+        *i*) ;;
+          *) return;;
+    esac
+
+    export MANPATH="$MANPATH:$otcova_path/.apps/exa/man"
+    export MANPATH="$MANPATH:$otcova_path/.apps/kitty.app/share/man"
+    export MANPATH="$MANPATH:$otcova_path/.apps/bat/man"
+    export MANPATH="$MANPATH:$otcova_path/.apps/nvim/man"
+    export MANPATH="$MANPATH:$otcova_path/.apps/rg/man"
+
+    if [ -e "$otcova_path/.apps/exa" ]; then
+        local icons="${icons---icons}" # Allow user to dissable icons with icons=""
+
+        alias l="exa ${icons} --sort=type --group-directories-first --git -x"
+        alias la="l -a"
+        alias ll="l -al"
+    fi
+
+    if [ "$(tput colors)" -ge 8 ]; then
+        local reset=$'\e[0m'
+        local black=$'\e[1;30m'
+        local red=$'\e[1;31m'
+        local green=$'\e[1;32m'
+        local yellow=$'\e[1;33m'
+        local blue=$'\e[1;34m'
+        local purple=$'\e[1;35m'
+        local cyan=$'\e[1;36m'
+        local white=$'\e[1;37m'
+    fi
+
+
+    if command -v __git_ps1 >/dev/null; then
+        PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
+    fi
+
+    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+        PS1='\n'$blue'\h'$reset':'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
+    else
+        PS1='\n'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
+    fi
+
+
+    stty -ixon # Prevent Ctrl-S/Q freeze
+    bind '"\e[A": history-search-backward'
+    bind '"\e[B": history-search-forward'
+    HISTCONTROL='ignoreboth:erasedup'
+
+    shopt -s checkwinsize # Check window size and update LINES/COLUMNS
+    shopt -s globstar # Enable ** pattern
+
+    # This solves: missing or unsuitable terminal: xterm-kitty
+    export TERM='screen-256color'
+
+    alias s=". ~/.bashrc"
+    alias o="xdg-open"
+    alias rc="v ~/.bashrc"
+    alias orc="pushd $otcova_path >/dev/null && v $otcova_path/config/bashrc"
+    alias vimc="vim ~/.vimrc"
+    alias nvimc="pushd ~/.config/nvim >/dev/null && v ~/.config/nvim/init.lua"
+
+    if command -v rg >/dev/null; then
+        alias hs="cat ~/.bash_history | rg"
+        alias fs="rg --files | rg"
+        alias pss="ps -A | rg"
+    else
+        alias hs="cat ~/.bash_history | grep"
+        alias fs="find . | grep"
+        alias pss="ps -A | grep"
+    fi
+
+    alias gac="git add -A && git commit --message"
+    alias gc="git commit --message"
+    alias ga="git add"
+    alias gp="git pull --ff-only && git push"
+    alias gs="git status && git pull --ff-only"
+    alias gb="git branch"
+    alias gd="git diff"
+    alias gw="git switch"
+    alias gk="git checkout"
+    alias gl="git log --pretty='format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s' --date='relative'"
+    alias gpull="git pull"
+    alias gpush="git push"
+
+    alias d="c ~/Desktop"
+    alias doc="c ~/Documents"
+    alias dow="c ~/Downloads"
+    alias pic="c ~/Pictures"
+    alias ..="c .."
+
+    if [ -n "$(command -v complete)" ]; then
+        _lazy_autocomplete() {
+            local path="$otcova_path/.apps/$1/completions/$1.bash"
+            if [ -f "$path" ]; then
+                . "$path"
+                "_$1" "$@"
+            fi
+        }
+
+        for command in rg bat exa; do
+            complete -F _lazy_autocomplete -o bashdefault -o default $command
+        done
+    fi
+}
+
+source-otcova

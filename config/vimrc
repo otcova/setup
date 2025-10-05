@@ -1,0 +1,45 @@
+let mapleader = " "
+
+set nu rnu
+set encoding=utf-8
+set belloff=all
+
+" Whitespace
+set wrap
+set formatoptions=
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set noshiftround
+
+" Window movement
+nnoremap <silent> <C-h> <C-w>h
+nnoremap <silent> <C-j> <C-w>j
+nnoremap <silent> <C-k> <C-w>k
+nnoremap <silent> <C-l> <C-w>l
+
+" Shortcuts
+nnoremap <leader>w :w<cr>
+nnoremap <leader>q :q<cr>
+
+" Search highlight
+set hlsearch incsearch
+nohlsearch
+nnoremap <silent> <esc><esc> :noh<cr>
+
+" Use system clipboard
+set clipboard=unnamedplus
+
+" Formatting
+nnoremap <tab> gg=G<c-o><c-o>zz
+
+" Goto references (Search word)
+nnoremap gr /<c-r><c-w><cr>
+
+" Color scheme (terminal)
+set t_Co=256
+set background=dark
+silent! colorscheme gruvbox
+" mkdir -p ~/.vim/colors/
+" wget -qO- 'https://raw.githubusercontent.com/morhetz/gruvbox/refs/heads/master/colors/gruvbox.vim' > ~/.vim/colors/gruvbox.vim
