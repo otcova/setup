@@ -1,19 +1,11 @@
--- Default indentation: tabs (size: 2)
+-- Default indentation
 vim.opt.tabstop = 4
-vim.opt.shiftwidth = 2
+vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.number = true
 vim.opt.relativenumber = true
 
 -- Show/Set current indentation
-local i_help = vim.trim([[
-:I h     -- Print :I cheatsheet
-:I       -- Print current indentation
-:I 4     -- Set indent to 4 spaces
-:I t     -- Set indent to tabs
-:I 4 c   -- Set & Convert indent
-:I d     -- Toggle display tabs & trailing spaces
-]])
 local indent_help = vim.trim([[
 :Indent help      -- Print :Indent cheatsheet
 :Indent           -- Print current indentation
@@ -24,11 +16,7 @@ local indent_help = vim.trim([[
 ]])
 
 vim.api.nvim_create_user_command("I", function(opts)
-  if opts.args == "h" or opts.args == "help" then
-    vim.notify(i_help)
-  else
-    vim.cmd("Indent " .. (opts.args or ""))
-  end
+  vim.cmd("Indent " .. (opts.args or ""))
 end, {
   nargs = "?",
   desc = "Alias for :Indent",

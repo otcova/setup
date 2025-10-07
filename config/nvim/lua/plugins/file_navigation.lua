@@ -1,6 +1,3 @@
--- Alternate file (:e#)
-vim.keymap.set("n", "<leader>a", "<cmd>e#<cr>")
-
 
 return {
   -- File explorer
@@ -95,11 +92,13 @@ return {
     cmd = "Telescope",
     keys = {
       -- Generic picker
+      { "<leader>b",  function() require('telescope.builtin').buffers() end },
       { "<leader>f",   function() require('telescope.builtin').find_files() end },
-      { "<leader>/",   function() require('telescope.builtin').live_grep() end },
+      { "<leader>pf",  function() require('telescope.builtin').find_files({no_ignore=true}) end },
       { "<leader>pg",  function() require('telescope.builtin').live_grep() end },
+      { "<leader>paf",  function() require('telescope.builtin').find_files({no_ignore=true, hidden=true}) end },
+      { "<leader>pag",  function() require('telescope.builtin').live_grep({no_ignore=true, hidden=true}) end },
       { "<leader>pr",  function() require('telescope.builtin').resume() end },
-      { "<leader>pb",  function() require('telescope.builtin').buffers() end },
       { "<leader>ph",  function() require('telescope.builtin').help_tags() end },
       { "<leader>pc",  function() require('telescope.builtin').commands() end },
       { "<leader>po",  function() require('telescope.builtin').oldfiles() end },

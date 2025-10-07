@@ -32,8 +32,6 @@ vim.diagnostic.config({
   severity_sort = true,
 })
 
-vim.keymap.set("n", "<c-k>", vim.diagnostic.open_float)
-
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'wgsl' },
   callback = function() vim.treesitter.start() end,

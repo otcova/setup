@@ -1,5 +1,3 @@
-vim.opt.scrolloff = 6
-
 -- Use system clipboard
 vim.schedule(function()
 	-- Preload the clipboard.vim to prevent it from being sourced on key press
