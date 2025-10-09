@@ -1,0 +1,14 @@
+[Unit]
+Description=Kanata keyboard remapper
+Documentation=https://github.com/jtroo/kanata
+
+[Service]
+Environment=PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin
+Environment=DISPLAY=:0
+Environment=HOME=%h
+Type=simple
+ExecStart=%h/.otcova-setup/.apps/kanata/bin/kanata --cfg %h/.otcova-setup/config/kanata/caps2esc.kbd
+Restart=no
+
+[Install]
+WantedBy=default.target

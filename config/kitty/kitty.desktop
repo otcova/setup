@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Kitty
+Comment=Terminal
+Keywords=shell;prompt;command;commandline;cmd;terminal;
+Type=Application
+Exec=sh -c '~/.otcova-setup/.apps/kitty.app/bin/kitty --start-as=fullscreen'
+Icon=org.gnome.Terminal
+Categories=TerminalEmulator;
+StartupNotify=true

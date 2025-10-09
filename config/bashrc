@@ -41,12 +41,15 @@ _c() {
 
     local last_word="${COMP_WORDS[COMP_CWORD]}"
 
+    base_dir=" $base_dir "
+    base_dir="${base_dir// \~ / $HOME }"
+    base_dir="${base_dir// \~\// $HOME\/}"
+    base_dir="${base_dir:1:-1}"
+
     local IFS=$'\n'
     COMPREPLY=($(
-        pushd "${base_dir:-.}" &>/dev/null && {
-            compgen -dS/ -- "$last_word"
-            popd &>/dev/null
-        }
+        cd "${base_dir:-.}"
+        compgen -dS/ -- "$last_word"
     ))
 
     ###### Handle Directories with Spaces ######
@@ -145,8 +148,28 @@ i-java() {
     echo "------------------------------"
 }
 
+i-kanata() {
+    app_path="$otcova_path/.apps/kanata"
+    rm -rf "$app_path"
+    mkdir -p "$app_path/bin"
+
+    wget -qO "$app_path/bin/kanata" 'https://github.com/jtroo/kanata/releases/latest/download/kanata'
+    chmod +x "$app_path/bin/kanata"
+
+    echo '-- Allow uinput without sudo --'
+    echo 'sudo groupadd --system uinput'
+    echo 'sudo usermod -aG input,uinput $USER'
+    echo 'sudo sh -c "echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' >/etc/udev/rules.d/99-uinput.rules"'
+    echo '-- Execute daemon on logging with systemd --'
+    echo "mkdir -p ~/.config/systemd/user"
+    echo "ln -sT $otcova_path/config/kanata/kanata.service ~/.config/systemd/user/kanata.service"
+    echo "systemctl --user enable kanata.service"
+}
+
 i-kitty() {
     wget -qO- https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin dest="$otcova_path/.apps"
+
+    echo "ln -sT $otcova_path/config/kitty/kitty.desktop ~/.local/share/applications/kitty.desktop"
 }
 
 i-tmux() {
@@ -276,6 +299,7 @@ source-otcova() {
     export PATH="$PATH:$otcova_path/.apps/nvim/bin"
     export PATH="$PATH:$otcova_path/.apps/delta/bin"
     export PATH="$PATH:$otcova_path/.apps/rg/bin"
+    export PATH="$PATH:$otcova_path/.apps/kanata/bin"
 
     # If not running interactively, exit early
     case $- in
@@ -324,6 +348,7 @@ source-otcova() {
     stty -ixon # Prevent Ctrl-S/Q freeze
     bind '"\e[A": history-search-backward'
     bind '"\e[B": history-search-forward'
+    bind "set show-all-if-ambiguous on" # Single tab completion
     HISTCONTROL='ignoreboth:erasedup'
 
     shopt -s checkwinsize # Check window size and update LINES/COLUMNS

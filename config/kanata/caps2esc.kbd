@@ -1,0 +1,6 @@
+;; Caps to escape/control configuration
+
+(defcfg process-unmapped-keys no)
+(defsrc caps)
+(defalias escctrl (tap-hold 200 200 esc lctl))
+(deflayer base @escctrl)
