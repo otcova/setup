@@ -313,6 +313,8 @@ source-otcova() {
     export MANPATH="$MANPATH:$otcova_path/.apps/nvim/man"
     export MANPATH="$MANPATH:$otcova_path/.apps/rg/man"
 
+    export TERMINFO_DIRS="$TERMINFO_DIRS:~/.otcova-setup/.apps/kitty.app/share/terminfo/"
+
     if [ -e "$otcova_path/.apps/exa" ]; then
         local icons="${icons---icons}" # Allow user to dissable icons with icons=""
 
@@ -353,9 +355,6 @@ source-otcova() {
 
     shopt -s checkwinsize # Check window size and update LINES/COLUMNS
     shopt -s globstar # Enable ** pattern
-
-    # This solves: missing or unsuitable terminal: xterm-kitty
-    export TERM='screen-256color'
 
     alias s=". ~/.bashrc"
     alias o="xdg-open"

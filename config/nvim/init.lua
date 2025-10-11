@@ -2,6 +2,8 @@ require("init_lazy")
 
 -- Common keymaps
 vim.keymap.set("n", "<c-k>", vim.diagnostic.open_float)
+vim.keymap.set("n", "gd", vim.lsp.buf.definition)
+vim.keymap.set("n", "gD", vim.lsp.buf.declaration)
 vim.keymap.set("n", "<leader>q", "<cmd>silent qa<CR>")
 vim.keymap.set({"n", "v"}, "<leader>a", "<cmd>e#<cr>")
 
