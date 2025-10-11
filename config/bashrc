@@ -313,7 +313,7 @@ source-otcova() {
     export MANPATH="$MANPATH:$otcova_path/.apps/nvim/man"
     export MANPATH="$MANPATH:$otcova_path/.apps/rg/man"
 
-    export TERMINFO_DIRS="$TERMINFO_DIRS:~/.otcova-setup/.apps/kitty.app/share/terminfo/"
+    export TERMINFO_DIRS="$TERMINFO_DIRS:$otcova_path/.apps/kitty.app/share/terminfo/"
 
     # Enable programmable completion
     if ! shopt -oq posix; then
@@ -400,6 +400,8 @@ source-otcova() {
     alias dow="c ~/Downloads"
     alias pic="c ~/Pictures"
     alias ..="c .."
+
+    export EDITOR="vim" # Use vim for sudoedit
 
     if [ -n "$(command -v complete)" ]; then
         _lazy_autocomplete() {

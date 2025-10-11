@@ -40,6 +40,7 @@ nnoremap gr /<c-r><c-w><cr>
 " Color scheme (terminal)
 set t_Co=256
 set background=dark
+let &term = (&term ==# "xterm-kitty") ? "screen-256color" : &term
 silent! colorscheme gruvbox
 " mkdir -p ~/.vim/colors/
 " wget -qO- 'https://raw.githubusercontent.com/morhetz/gruvbox/refs/heads/master/colors/gruvbox.vim' > ~/.vim/colors/gruvbox.vim
