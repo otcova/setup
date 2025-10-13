@@ -72,6 +72,38 @@ _c() {
 
 complete -F _c -o nospace c
 
+i-sshd() {
+    cat_cmd="cat"
+    if command -v bat >/dev/null; then
+        cat_cmd="bat -pl=md"
+    fi
+
+$cat_cmd << 'EOF'
+# Start deamon
+> sudo systemctl start ssh
+
+# Dissable wifi.powersave to reduce latency
+> sudoedit /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+
+```
+[connection]
+wifi.powersave = 2
+```
+
+# Configure sshd
+> sudoedit /etc/ssh/sshd_config
+
+```
+Banner none     # Dissable welcome message
+PrintLastLog no # Dissable last log message
+PrintLastLog no # Dissable last log message
+
+AllowUsers ocomas@192.168.0.0/16 # Deny non LAN connections
+```
+EOF
+
+}
+
 i-git() {
     app_path="$otcova_path/.apps/git"
     mkdir -p "$app_path"
