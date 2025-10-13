@@ -403,6 +403,7 @@ source-otcova() {
     alias orc="pushd $otcova_path >/dev/null && v $otcova_path/config/bashrc"
     alias vimc="vim ~/.vimrc"
     alias nvimc="pushd ~/.config/nvim >/dev/null && v ~/.config/nvim/init.lua"
+    alias tmuxc="v ~/.tmux.conf"
 
     if command -v rg >/dev/null; then
         alias hs="cat ~/.bash_history | rg"
