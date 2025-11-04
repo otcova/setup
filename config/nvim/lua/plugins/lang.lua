@@ -72,7 +72,11 @@ return {
         "stevearc/conform.nvim",
         lazy = true,
         cmd = "ConformInfo",
-        opts = {},
+        opts = {
+            formatters_by_ft = {
+                markdown = { "prettierd" },
+            },
+        },
         keys = {
             {
                 "<leader>w",

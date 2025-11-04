@@ -47,6 +47,7 @@ vim.keymap.set("t", "<esc>", "<c-\\><c-n>", opts)
 vim.keymap.set({"n", "t"}, "<c-e>", open_terminal, opts)
 vim.keymap.set("n", "E", function() open_terminal(true) end, opts)
 
+vim.keymap.set("n", "dl", "2x", opts)
 
 
 
@@ -64,4 +65,26 @@ end)
 
 
 
+local function to_snake_case(word)
+    word = word:gsub("-", "_")
+    word = word:gsub("(%l)(%u)", "%1_%2")
+    return word:lower()
+end
 
+local function to_pascal_case(word)
+    word = word:gsub("([_%-%s])(%a)", function(_, c) return c:upper() end)
+    return word:gsub("^%l", string.upper)
+end
+
+local function change_cursor_word(case)
+    local word = vim.fn.expand("<cword>")
+    if not word or word == "" then return end
+
+    local snake = case(word)
+    if snake == word then return end
+
+    vim.cmd("normal! ciw" .. snake)
+end
+
+vim.keymap.set("n", "cs", function() change_cursor_word(to_snake_case) end)
+vim.keymap.set("n", "cp", function() change_cursor_word(to_pascal_case) end)
