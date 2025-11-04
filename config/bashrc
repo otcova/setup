@@ -168,6 +168,18 @@ i-rust() {
     fi
 }
 
+alias i-npm='i-node'
+i-node() {
+    # Download Node Version Manager
+    wget -qO- 'https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh' | bash
+    . "$HOME/.nvm/nvm.sh"
+
+    # Install node js LTS
+    nvm install --lts
+
+    echo 'PLACE INTO RC: . "$HOME/.nvm/nvm.sh"'
+}
+
 i-java() {
     curl -s "https://get.sdkman.io" | bash
 
