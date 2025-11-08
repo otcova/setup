@@ -105,6 +105,7 @@ return {
         opts = {
             highlight = {
                 enable = true,
+                additional_vim_regex_highlighting = false,
             },
             ensure_installed = {
                 "c",
@@ -112,6 +113,8 @@ return {
                 "bash",
                 "regex",
                 "wgsl",
+                "markdown",
+                "markdown_inline",
             },
             auto_install = true,
         },
@@ -165,5 +168,10 @@ return {
                 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
             },
         },
+    },
+    {
+        'mrcjkb/rustaceanvim',
+        version = '^6',
+        lazy = false, -- This plugin is already lazy
     },
 }
