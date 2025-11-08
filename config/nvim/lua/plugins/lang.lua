@@ -1,4 +1,8 @@
 local show_sign_column = function(buf)
+    if not vim.api.nvim_buf_is_valid(buf) then
+        return
+    end
+
     local ft = vim.bo[buf].filetype
     local bt = vim.bo[buf].buftype
 
@@ -153,10 +157,10 @@ return {
                 ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
                 ['<C-y>'] = { 'select_and_accept', 'show' },
                 ['<C-k>'] = { 'select_and_accept', 'show' },
-    
+
                 ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
                 ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
-    
+
                 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
                 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
             },
