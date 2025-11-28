@@ -8,7 +8,7 @@
 ## mini.ai
 
 vaf - around function
-vaa - around argument
+via - inside argument
 vab - around brackets
 vaq - around quotes
 

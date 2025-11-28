@@ -2,6 +2,12 @@
 
 otcova_path="$(dirname -- "$(dirname -- "$(realpath -- "${BASH_SOURCE-$0}")")")"
 
+loop() {
+    while true; do
+        "$@" || sleep 1
+    done
+}
+
 v() {
     if command -v nvim >/dev/null; then
         nvim "$@"
@@ -160,12 +166,12 @@ i-git() {
 }
 
 i-rust() {
-    if command -v rustup >/dev/null; then
-        rustup component add rust-analyzer
-        rustup update
-    else
+    if ! command -v rustup >/dev/null; then
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+        . ~/.bashrc
     fi
+    rustup component add rust-analyzer
+    rustup update
 }
 
 alias i-npm='i-node'
@@ -411,6 +417,7 @@ source-otcova() {
 
     alias s=". ~/.bashrc"
     alias o="xdg-open"
+    alias t="tmux new -A"
     alias rc="v ~/.bashrc"
     alias orc="pushd $otcova_path >/dev/null && v $otcova_path/config/bashrc"
     alias vimc="vim ~/.vimrc"

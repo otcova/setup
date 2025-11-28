@@ -32,7 +32,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.diagnostic.config({
-    underline = false,
+    underline = true,
     severity_sort = true,
 })
 
