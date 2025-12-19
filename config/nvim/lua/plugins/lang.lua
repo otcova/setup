@@ -41,6 +41,7 @@ vim.api.nvim_create_autocmd('FileType', {
     callback = function() vim.treesitter.start() end,
 })
 
+
 return {
     -- Default condifuration for many LSPs
     {
@@ -48,6 +49,11 @@ return {
         event = { "BufReadPost", "BufNewFile" },
         cmd = "LspInfo",
         init = function()
+            -- vim.lsp.config("clangd", {
+            --     cmd = { "clangd" },
+            -- });
+            -- vim.lsp.enable('clangd');
+
             -- vim.lsp.config("*", {
             --     capabilities = {
             --         textDocument = {

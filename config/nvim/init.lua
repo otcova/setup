@@ -89,4 +89,8 @@ end
 vim.keymap.set("n", "cs", function() change_cursor_word(to_snake_case) end)
 vim.keymap.set("n", "cp", function() change_cursor_word(to_pascal_case) end)
 
-vim.g.markdown_fenced_languages = { 'html', 'python', 'ruby', 'vim', 'c', 'cpp', 'lua', 'javascript', 'rust', 'verilog' }
+vim.g.markdown_fenced_languages = {
+    'html', 'python', 'vim', 'lua',
+    'c', 'cpp', 'javascript', 'rust',
+    'verilog', 'systemverilog',
+}

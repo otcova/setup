@@ -35,7 +35,7 @@ vim.api.nvim_create_user_command("Indent", function(opts)
 
   -- Toggle display tabs and trailing spaces
   if args[1] == "d" or args[1] == "display" then
-    vim.opts.list = not vim.opts.list:get()
+    vim.opt.list = not vim.opt.list:get()
     return
   end
 
@@ -59,16 +59,16 @@ vim.api.nvim_create_user_command("Indent", function(opts)
 
       if prev_indent_spaces and not indent_spaces then
         local prev_spaces = string.rep(" ", prev_indent_spaces)
-        print("Converting from '" ..  prev_spaces .. "' to '\\t'")
+        print("Converting from '" .. prev_spaces .. "' to '\\t'")
         vim.cmd("silent! %s/" .. prev_spaces .. "/\\t/g")
       elseif not prev_indent_spaces and indent_spaces then
         local new_spaces = string.rep(" ", indent_spaces)
-        print("Converting from '\\t' to '" ..  new_spaces .. "'")
+        print("Converting from '\\t' to '" .. new_spaces .. "'")
         vim.cmd("silent! %s/\\t/" .. new_spaces .. "/g")
       elseif prev_indent_spaces and indent_spaces then
         local prev_spaces = string.rep(" ", prev_indent_spaces)
         local new_spaces = string.rep(" ", indent_spaces)
-        print("Converting from '" ..  prev_spaces .. "' to '" .. new_spaces .. "'")
+        print("Converting from '" .. prev_spaces .. "' to '" .. new_spaces .. "'")
         vim.cmd("silent! %s/" .. prev_spaces .. "/" .. new_spaces .. "/g")
       end
     end
