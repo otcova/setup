@@ -410,6 +410,7 @@ source-otcova() {
     bind '"\e[A": history-search-backward'
     bind '"\e[B": history-search-forward'
     bind "set show-all-if-ambiguous on" # Single tab completion
+    bind 'set bell-style none'
     HISTCONTROL='ignoreboth:erasedup'
 
     shopt -s checkwinsize # Check window size and update LINES/COLUMNS

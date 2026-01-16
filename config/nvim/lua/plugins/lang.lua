@@ -93,7 +93,7 @@ return {
                 function()
                     require("conform").format({
                         lsp_fallback = true,
-                        timeout_ms = 500,
+                        timeout_ms = 1000,
                     })
                     vim.cmd("update")
                 end,
@@ -166,6 +166,7 @@ return {
                 ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
                 ['<C-y>'] = { 'select_and_accept', 'show' },
                 ['<C-k>'] = { 'select_and_accept', 'show' },
+                ["<C-l>"] = { "show_documentation" },
 
                 ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
                 ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
@@ -180,4 +181,9 @@ return {
         version = '^6',
         lazy = false, -- This plugin is already lazy
     },
+    {
+        'kaarmu/typst.vim',
+        ft = 'typst',
+        lazy = false,
+    }
 }

@@ -93,4 +93,5 @@ vim.g.markdown_fenced_languages = {
     'html', 'python', 'vim', 'lua',
     'c', 'cpp', 'javascript', 'rust',
     'verilog', 'systemverilog',
+    'bash',
 }
