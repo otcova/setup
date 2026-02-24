@@ -150,7 +150,7 @@ i-git() {
         printf "Keep current ssh '$current_ssh' (yes): "
         read keep_current
         if [ -z "$keep_current" ] || [ "$keep_current" != "${keep_current#[Yy]}" ]; then
-            exit;
+            return;
         fi
     fi
 
