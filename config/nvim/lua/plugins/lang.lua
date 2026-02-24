@@ -84,7 +84,7 @@ return {
         cmd = "ConformInfo",
         opts = {
             formatters_by_ft = {
-                markdown = { "prettierd" },
+                -- markdown = { "prettierd" },
             },
         },
         keys = {

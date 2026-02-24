@@ -100,10 +100,18 @@ return {
     ---@module 'render-markdown'
     ---@type render.md.UserConfig
     opts = {
-      render_modes = { 'n', 'c', 't', 'i' },
+      render_modes = true, -- Alternative: { 'n', 'c', 't', 'i', 'v', 'V' },
+      heading = {
+        border = true,
+        icons = {},
+        left_pad = 4,
+      },
       code = {
+        language = false,
         border = "thin",
       },
+      -- Presentation Mode:
+      -- anti_conceal = { enabled = false }
     },
   }
 }
