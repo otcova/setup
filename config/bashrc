@@ -16,8 +16,35 @@ v() {
     fi
 }
 
+p() {
+    cd "$HOME/Documents/${1:-}" || return
+    if [ -z "${TMUX:-}" ]; then
+        if command -v nvim >/dev/null; then
+            tmux new -As "${1:-Documents}" nvim
+        else
+            tmux new -As "${1:-Documents}" vim
+        fi
+        exit
+    else
+        v
+    fi
+}
+
 gap() {
     git add -A && git commit --message "$1" && git push
+}
+
+gs() {
+    git status
+
+    # try pull if the current branch has an upstream set
+    if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+        echo
+        git pull --ff-only
+    else
+        echo
+        echo "No upstream configured for this branch."
+    fi
 }
 
 . "$otcova_path/config/complete_alias"
@@ -366,12 +393,8 @@ source-otcova() {
     export TERMINFO_DIRS="$TERMINFO_DIRS:$otcova_path/.apps/kitty.app/share/terminfo/"
 
     # Enable programmable completion
-    if ! shopt -oq posix; then
-      if [ -f /usr/share/bash-completion/bash_completion ]; then
-        . /usr/share/bash-completion/bash_completion
-      elif [ -f /etc/bash_completion ]; then
-        . /etc/bash_completion
-      fi
+    if ! shopt -oq posix && [ -z "${BASH_COMPLETION_VERSINFO:-}" ]; then
+        . "$otcova_path/config/bash_completion" 2>/dev/null
     fi
 
     if [ -e "$otcova_path/.apps/exa" ]; then
@@ -395,16 +418,20 @@ source-otcova() {
     fi
 
 
+    # Prompt
     if command -v __git_ps1 >/dev/null; then
         PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
     fi
-
     if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
         PS1='\n'$blue'\h'$reset':'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
     else
         PS1='\n'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
     fi
 
+    # if LANG unset, icons do not work in tmux
+    if [ -z "$LANG" ]; then
+      export LANG='C.UTF-8'
+    fi
 
     stty -ixon # Prevent Ctrl-S/Q freeze
     bind '"\e[A": history-search-backward'
@@ -421,7 +448,7 @@ source-otcova() {
     alias t="tmux new -A"
     alias rc="v ~/.bashrc"
     alias orc="pushd $otcova_path >/dev/null && v $otcova_path/config/bashrc"
-    alias vimc="vim ~/.vimrc"
+    alias vimc="v ~/.vimrc"
     alias nvimc="pushd ~/.config/nvim >/dev/null && v ~/.config/nvim/init.lua"
     alias tmuxc="v ~/.tmux.conf"
 
@@ -435,23 +462,16 @@ source-otcova() {
         alias pss="ps -A | grep"
     fi
 
+    # function gap: add, commit, push
+    # function gs: status, fetch if upstream
     alias gac="git add -A && git commit --message"
+    alias gaa="git add -A && git commit --amend --no-edit"
     alias gc="git commit --message"
-    alias ga="git add"
-    alias gp="git pull --ff-only && git push"
-    alias gs="git status && git pull --ff-only"
-    alias gb="git branch"
-    alias gd="git diff"
-    alias gw="git switch"
-    alias gk="git checkout"
     alias gl="git log --pretty='format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s' --date='relative'"
-    alias gpull="git pull"
-    alias gpush="git push"
 
-    alias d="c ~/Desktop"
-    alias doc="c ~/Documents"
-    alias dow="c ~/Downloads"
-    alias pic="c ~/Pictures"
+    alias dk="c ~/Desktop"
+    alias dc="c ~/Documents"
+    alias dw="c ~/Downloads"
     alias ..="c .."
 
     export EDITOR="vim" # Use vim for sudoedit
