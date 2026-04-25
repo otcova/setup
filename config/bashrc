@@ -37,7 +37,7 @@ gap() {
 gs() {
     git status
 
-    # try pull if the current branch has an upstream set
+    # Pull if the current branch has an upstream set
     if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
         echo
         git pull --ff-only
@@ -420,7 +420,7 @@ source-otcova() {
 
     # Prompt
     if command -v __git_ps1 >/dev/null; then
-        PROMPT_COMMAND='PS1_GIT=$(__git_ps1 " (%s)")'
+        PROMPT_COMMAND="$PROMPT_COMMAND"';PS1_GIT=$(__git_ps1 " (%s)")'
     fi
     if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
         PS1='\n'$blue'\h'$reset':'$green'\w'$blue'${PS1_GIT}'$reset'\n> '
@@ -438,7 +438,13 @@ source-otcova() {
     bind '"\e[B": history-search-forward'
     bind "set show-all-if-ambiguous on" # Single tab completion
     bind 'set bell-style none'
+
+    # Only truncate ~/.bash_history when reaching 1M lines
+    HISTSIZE=1000000
     HISTCONTROL='ignoreboth:erasedup'
+    # # Update & load bash history when writing a command
+    # PROMPT_COMMAND='history -a;history -c;history -r'
+    PROMPT_COMMAND=''
 
     shopt -s checkwinsize # Check window size and update LINES/COLUMNS
     shopt -s globstar # Enable ** pattern
@@ -468,6 +474,7 @@ source-otcova() {
     alias gaa="git add -A && git commit --amend --no-edit"
     alias gc="git commit --message"
     alias gl="git log --pretty='format:%C(yellow)%h %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s' --date='relative'"
+    alias gd="git diff HEAD"
 
     alias dk="c ~/Desktop"
     alias dc="c ~/Documents"

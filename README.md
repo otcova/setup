@@ -30,6 +30,7 @@ gap <msg> # git add -A && git commit --message <msg> && git push
 
 gs        # git status (and fetch if upstream)
 gl        # git log (with a compact format)
+gd        # git diff HEAD
 ```
 
 ## Quick Edit
