@@ -96,6 +96,8 @@ vim.g.markdown_fenced_languages = {
   'sh', 'bash',
 }
 
+vim.keymap.set('n', '<C-n>', ':cnext<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-p>', ':cprev<CR>', { noremap = true, silent = true })
 
 -- -- Presentation Mode:
 -- vim.opt.scrolloff = 0
